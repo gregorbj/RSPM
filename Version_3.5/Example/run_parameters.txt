@@ -1,0 +1,67 @@
+# GreenSTEP Run Parameters
+# This file identifies several parameters that identify whether the scenario is for the base year or not
+# And what the run years are
+
+# Identify the base year
+BaseYear = "2010"
+
+# Identify the domain of years
+# This lists all years that may be run
+Yr = c( "2005", "2010", "2038")
+
+# Specify whether a VMT tax surcharge is to be calculated
+# Change value to TRUE if a VMT tax surcharge is to be calculated
+CalcVmtSurcharge = FALSE
+
+# Alternate parameter settings to determine what parts of the model and years will be run
+#========================================================================================
+
+# Uncomment (remove the # mark) the following lines to run and calibrate the base year household synthesis
+# Only set PlotCalibration = TRUE if supporting files and R libraries are present
+# Identify shapefile parameters if a map of calibrated district weights is to be plotted
+# Shapefile is a vector identifying the name of the shapefile (without the .shp extention),
+# the name of the field identifying district names, and the name of the field identifying
+# division names. Comment the line if a shapefile is not present.
+#---------------------------------------------------------------------------------------------------------
+#RunHhSynthesis = TRUE
+#RunTravel = FALSE
+#RunOutputs = FALSE
+#RunYears = BaseYear
+#UseSavedRandomSeed = TRUE
+#PlotCalibration = TRUE
+#Shapefile = c(Filename="RVMPO_Districts", DistrictField="DISTRICT", DivisionField="DIVISION")
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------|
+#Before continuing below, for all years, need to copy calibrated income weight values from "calibrated_income_weights.csv" into "income_weights.csv" |
+#in "land_forecasts" foleder. And also need to copy calibrated income proportion value from "calibrated_income_proportions.csv" into                 |
+#"regional_inc_prop.csv" in "model" folder.                                                                                                          |
+#----------------------------------------------------------------------------------------------------------------------------------------------------|  
+
+#Uncomment the following lines to complete the household synthesis for other past and/or future years
+#----------------------------------------------------------------------------------------------------
+#RunHhSynthesis = TRUE
+#RunTravel = FALSE
+#RunOutputs = FALSE
+#UseSavedRandomSeed = TRUE
+#RunYears = c( "2005", "2038" )
+
+# Uncomment the following lines to run the travel model for the base year and any other specified years without tabulating outputs 
+#---------------------------------------------------------------------------------------------------------------------------------
+RunHhSynthesis = FALSE
+RunTravel = TRUE
+RunOutputs = TRUE
+UseSavedRandomSeed = TRUE
+RunYears = c(  BaseYear, "2005", "2038" )
+
+# Uncomment the following lines to create output tabulations without running travel model
+#----------------------------------------------------------------------------------------
+#RunHhSynthesis = FALSE
+#RunTravel = FALSE
+#RunOutputs = TRUE
+#RunYears = c( "2005", "2010", "2038" )
+
+
+
+
+
+
