@@ -1,11 +1,14 @@
 #calc_summary_measures.r
 #Brian Gregor
-#4/22/2014, 11:11 AM
+#2/4/2016, 11:30 AM
 
 #Purpose
 #-------
 #This script calculates a number of metropolitan areawide and district level measures from one or more RSPM scenarios.  The results are put into a table that is saved as a CSV formatted text file where the rows correspond to measures and the columns correspond to scenarios and years.  The areawide measures to be calculated are specified in a text file whose format is described below.  This enables the output measures to be revised without revising the code in this script.  New measures can be added as long as the data needed to calculate the measures is contained in the standard objects saved as part of a RSPM run (Outputs_, Inputs_, Model_).  Standard R expressions are used to specify the calculations.  In a similar fashion, an input file specifies the calculation of district-level measures.  However, because districts add another dimension to the table, the results are flattened out in the final output table so that the rows correspond to the combination of a measure and district.
 
+#Revisions
+#---------
+#2/4/2016: The "calcAreaMeasures" function was revised to enable the specification of temporary variable. These variables are calculated and added to the "Summary_" list just like any other performance measures. However, they are removed from list before the area performance measure table is created. The names of temporary variables must be prefixed by "Temp_", "temp_", or "TEMP_".
 
 #Define function to calculate the areawide summary measures for a scenario
 #-------------------------------------------------------------------------
@@ -45,6 +48,13 @@ calcAreaMeasures <- function( Year ) {
     Summary_[[MeasureName]] <- try( eval( parse( text=CalcSpec ) ) )
   }
 
+  # Remove temporary measures
+  #i.e. measures whose names start with Temp_, temp_, or TEMP_
+  MeasureNames_ <- strsplit(names(Summary_), "_")
+  IsTempMeasure. <- unlist(lapply(MeasureNames_, function(x) {
+    x[1] %in% c("Temp", "temp", "TEMP")}))  
+  Summary_ <- Summary_[!IsTempMeasure.]
+  
   # Make into vector and clean out superfluous names
   Summary. <- sapply( Summary_, function(x) {
     Y <- x
@@ -52,8 +62,8 @@ calcAreaMeasures <- function( Year ) {
     Y } )
   
   # Make a named vector of the units
-  Units. <- CalcSpecs..$Units
-  names( Units. ) <- CalcSpecs..$Measure
+  Units. <- CalcSpecs..$Units[!IsTempMeasure.]
+  names( Units. ) <- CalcSpecs..$Measure[!IsTempMeasure.]
   
   # Function exit procedure
   on.exit( detach(Hh_) )

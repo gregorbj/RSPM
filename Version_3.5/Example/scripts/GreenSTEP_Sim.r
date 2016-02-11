@@ -7,7 +7,7 @@
 #http://www.apache.org/licenses/LICENSE-2.0
 #Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
 #Version: 3.5
-#Date: 6/22/15
+#Date: 1/10/16
 
 #Description
 #===========
@@ -422,13 +422,12 @@ for( yr in RunYears ) {
     LtVehAdjFactor.Hh <- ( SynPop..$Dvmt - LtVehDvmt.Hh ) / SynPop..$Dvmt
     LtVehAdjFactor.Hh[ SynPop..$Dvmt == 0 ] <- 1
     
-    # Calculate overall adjustment factor and apply to adjust DVMT
-    #-------------------------------------------------------------
-    TdmLtVehAdjFactor.Hh <- TdmAdjFactor.Hh * LtVehAdjFactor.Hh
-    SynPop..$LtVehDvmt <- LtVehDvmt.Hh
-    SynPop..$TdmLtVehAdjFactor <- TdmLtVehAdjFactor.Hh
-    SynPop..$Dvmt <- SynPop..$Dvmt * TdmLtVehAdjFactor.Hh
-    rm( LtVehDvmt.Hh, TdmAdjFactor.Hh, LtVehAdjFactor.Hh, TdmLtVehAdjFactor.Hh, ModelVar.,
+    # Calculate overall adjustment factor 
+    #------------------------------------
+    SynPop..$LtVehAdjFactor <- LtVehAdjFactor.Hh  #Save the factor in SynPop..
+    SynPop..$TdmAdjFactor <- TdmAdjFactor.Hh  #Save the factor in SynPop..
+    SynPop..$TdmLtVehAdjFactor <- TdmAdjFactor.Hh * LtVehAdjFactor.Hh  #Save the factor in SynPop..
+    rm( LtVehDvmt.Hh, TdmAdjFactor.Hh, LtVehAdjFactor.Hh, ModelVar.,
         TdmAdjDvmt.Hh )
     SynPop..$LogSize <- NULL
     SynPop..$LogDvmt <- NULL
@@ -755,8 +754,13 @@ for( yr in RunYears ) {
                                        BudgetProp=BudgetProp, AnnVmtInflator=AnnVmtInflator, 
                                        TrnstnProp=1 )[[1]]
       
+      #Calculate light-weight vehicle DVMT and adjust household DVMT
+      #-------------------------------------------------------------
+      SynPop..$LtVehDvmt <- SynPop..$Dvmt * (1 - SynPop..$LtVehAdjFactor)
+      SynPop..$Dvmt <- SynPop..$Dvmt * SynPop..$TdmLtVehAdjFactor
+      
       #Calculate 95th percentile and maximum DVMT
-      #--------------------------------------------------------------
+      #------------------------------------------
       SynPop..$MaxDvmt <- 0
       SynPop..$Dvmt95 <- 0
       MetroMax95th.2d <- predictMaxDvmt( SynPop..[ , c( "Dvmt", "MaxDvmt", "Dvmt95" ) ], DvmtLmModels_, "Metro" )
@@ -860,7 +864,14 @@ for( yr in RunYears ) {
       # Sum household light vehicle DVMT
       HhDvmt <- sum( Dvmt.MdDt )
       # Calculate commercial service vehicle DVMT
-      CommVehDvmt.MdDt <- calcCommVehTravel( Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr] )$CommVehDvmt.MdDt
+      if (CommVehDvmtMethod == "HouseholdIncome") {
+        CommVehDvmt.MdDt <- calcCommVehTravelFromHhIncome(
+          Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr])$CommVehDvmt.MdDt
+      }
+      if (CommVehDvmtMethod == "HouseholdDvmt") {
+        CommVehDvmt.MdDt <- calcCommVehTravelFromHhDvmt(
+          Dvmt.MdDt, CommVmtFactor)$CommVehDvmt.MdDt
+      }
       CommVehDvmt <- sum( CommVehDvmt.MdDt )
       # Calculate total light vehicle DVMT that is on metropolitan area roadways
       LtVehDvmt <- ( HhDvmt + CommVehDvmt ) * LtVehDvmtFactor.Ma
@@ -934,7 +945,14 @@ for( yr in RunYears ) {
     # Store all the commercial service vehicle calculations in a list
     CommServ_ <- list()
     # Calculate CS DVMT by county and development type
-    CommServ_ <- c( CommServ_, calcCommVehTravel( Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr] ) )
+    if (CommVehDvmtMethod == "HouseholdIncome") {
+      CommServ_ <- c( CommServ_, calcCommVehTravelFromHhIncome(
+        Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr]) )
+    }
+    if (CommVehDvmtMethod == "HouseholdDvmt") {
+      CommServ_ <- c( CommServ_, calcCommVehTravelFromHhDvmt(
+        Dvmt.MdDt, CommVmtFactor) )
+    }
     # Calculate DVMT by vehicle type a vehicle age characteristics
     CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehTypeAgeProp( 
       CommVehDvmt.MdDt, yr, CommServiceLtTruckProp.Yr,

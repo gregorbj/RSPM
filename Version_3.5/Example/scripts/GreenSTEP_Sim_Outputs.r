@@ -1,12 +1,20 @@
 #GreenSTEP_Sim_Outputs.r
 #=======================
 #Regional Strategic Planning Model (RSPM) GreenSTEP Version
-#Copyright 2009 - 2015, Oregon Department of Transportation
+#Copyright 2009 - 2016, Oregon Department of Transportation
 #Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 #http://www.apache.org/licenses/LICENSE-2.0
 #Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
-#Version: 3.5
-#Date: 6/22/15
+#Version: 3.5.1
+#Date: 2/4/16
+#Author: Brian Gregor, Oregon Systems Analytics LLC, gregor@or-analytics.com
+
+
+#Revisions
+#=========
+#2/4/16: 
+#Added tabulation of total parking cashout payments by district, income group, development type, and population type. The new array is named "HhCashout.DiIgDtPp" and is a component of the "Hh_" list.
+#Added tabulation of the number of zero vehicle households. The new array is named NumZeroVehHh.DiIgDtPpHt and is a component of the "Hh_" list.
 
 
 #Define functions for calculating water use and critical air pollutant emissions
@@ -166,8 +174,10 @@ for( yr in RunYears ) {
   Hh_$HcDvmt.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
   Hh_$HcDvmt.DiVtPt <- array( 0, dim=c( length(Di), length(Vt), length(Pt) ), dimnames=list( Di, Vt, Pt ) )
   Hh_$Hh.DiIgDtPpHt <- array( 0, dim=c(OutputDims.,length(Ht)), dimnames=c(OutputDimnames_, list(Ht)) )
+  Hh_$NumZeroVehHh.DiIgDtPpHt <- array( 0, dim=c(OutputDims.,length(Ht)), dimnames=c(OutputDimnames_, list(Ht)) )
   Hh_$HhCo2e.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
   Hh_$HhInc.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
+  Hh_$HhCashout.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
   Hh_$HhExtCost.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
   Hh_$HhOpCost.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
   Hh_$HhParkingCost.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
@@ -312,7 +322,21 @@ for( yr in RunYears ) {
     Hh_$Hh.DiIgDtPpHt[Dx, , , , ] <<- Tab.5d
     #Hh_$Hh.DiIgDtPpHt[Dx, , , , ] <- Tab.5d
     rm( Tab.5d )
-					
+
+    # Number of zero-vehicle households
+    IsZeroVeh <- SynPop..$Hhvehcnt == 0
+    Tab.5d <- tabulate(SynPop..$Houseid[IsZeroVeh],
+                       list(SynPop..$District[IsZeroVeh], 
+                            SynPop..$IncGrp[IsZeroVeh],
+                            SynPop..$DevType[IsZeroVeh],
+                            PopType.[IsZeroVeh],
+                            SynPop..$HouseType[IsZeroVeh]),
+                       list(Dx,Ig,Dt,Pp,Ht),
+                       "Count")
+    Hh_$NumZeroVehHh.DiIgDtPpHt[Dx, , , , ] <<- Tab.5d
+    #Hh_$NumZeroVehHh.DiIgDtPpHt[Dx, , , , ] <- Tab.5d
+    rm( Tab.5d, IsZeroVeh )
+    
     # Driver age population
     VehHhDrvPop.4d <- tabulate(SynPop..$DrvAgePop,
                                list(SynPop..$District, SynPop..$IncGrp, 
@@ -403,6 +427,16 @@ for( yr in RunYears ) {
     #Hh_$HhInc.DiIgDtPp[Dx, , , ] <- HhInc.4d
     rm(HhInc.4d)
                                                                                 
+    # Household parking cashout income adjustment
+    HhCashout.4d <- tabulate(SynPop..$CashOutIncAdj, 
+                             list(SynPop..$District, SynPop..$IncGrp, 
+                                  SynPop..$DevType, PopType.),
+                             list(Dx, Ig, Dt, Pp),
+                             "Sum") 
+    Hh_$HhCashout.DiIgDtPp[Dx, , , ] <<- HhCashout.4d
+    #Hh_$HhCashout.DiIgDtPp[Dx, , , ] <- HhCashout.4d
+    rm(HhCashout.4d)
+    
     # Household CO2e
     Co2e.Hh <- SynPop..$FuelCo2e + SynPop..$ElecCo2e   
     Co2e.4d <- tabulate(Co2e.Hh, 
