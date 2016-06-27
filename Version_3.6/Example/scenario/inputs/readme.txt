@@ -1,0 +1,1 @@
+1)hvy_veh_mpg_mpk.csv: need to fill the Bus_MPkWh column. Values are coming from vehicle_mpg.csv in :\6430only\Projects\OSTI-STS_SB-1059\Strategic Assessments\MPO Assessments\CAMPO\Inputs Related SmartGAP\SmartGAP Input Files\parameters 
