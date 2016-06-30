@@ -22,6 +22,10 @@ DvmtRoad,"Dvmt.Ty[""LtVeh""]",Total light vehicle DVMT on roads within MPO bound
 DvmtCapHousehold,Summary_$DvmtHousehold / Summary_$PopHousehold,Average Percapita DVMT of MPO households
 DvmtCapGroupQtr,Summary_$DvmtGroupQtr / Summary_$PopGroupQtr,Average Percapita DVMT of MPO group quarters residents
 DvmtCapRoad,Summary_$DvmtRoad / Summary_$PopTotal,Average Percapita DVMT of light-duty vehicle travel on roads within MPO boundary
+AutonomousDvmt,sum(AuDvmt.DiIgDtPp),Total household and group quarters DVMT by autonomous vehicles (both owned and car service)
+CarServiceDvmt,sum(CarSvcDvmt.DiIgDtPp),Total household and group quarters DVMT using car services.
+PropAutonomousDvmt,Summary_$AutonomousDvmt / (Summary_$DvmtHousehold + Summary_$DvmtGroupQtr),Proportion of household and group quarters DVMT by autonomous vehicles
+PropCarServiceDvmt,Summary_$CarServiceDvmt / (Summary_$DvmtHousehold + Summary_$DvmtGroupQtr),Proportion of household and group quarters DVMT by car services
 Co2eHousehold,"365 * sum( HhCo2e.DiIgDtPp[,,,""Household""] )",Annual metric tons of CO2e emitted by household light-duty vehicles
 Co2eGroupQtr,"365 * sum( HhCo2e.DiIgDtPp[,,,""GroupQtr""] )",Annual metric tons of CO2e emitted by group quarters residents' light-duty vehicles
 Co2eCommercial,365 * CommVehCo2e,Annual metric tons of CO2e emitted by commercial service vehicles
@@ -44,6 +48,10 @@ FuelEconomyCommercial,( 365 * Summary_$DvmtCommercial ) / Summary_$FuelCommercia
 FuelEconomyTotal,( 365 * Summary_$DvmtTotal ) / Summary_$FuelTotal,Average fuel economy (miles per gallon) of al MPO light-duty vehicles
 WalkTripsCapHousehold,"365 * sum( WalkTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita walk trips of MPO households
 WalkTripsCapGroupQtr,"365 * sum( WalkTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita walk trips of MPO group quarters residents
+BikeTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
+BikeTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
+TransitTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
+TransitTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
 SovToBikeDiversion,"mean( LtVehParm_Va..$PropSuitable[,Year] )",Target rate of diversion of SOV tours to bike tours
 BikeDvmtCapHousehold,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""Household""] ) / Summary_$PopHousehold",Average annual percapita bike miles of MPO households
 BikeDvmtCapGroupQtr,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""GroupQtr""]  ) / Summary_$PopGroupQtr",Average annual percapita bike miles of MPO group quarters residents

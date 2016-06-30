@@ -5,8 +5,8 @@
 #Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 #http://www.apache.org/licenses/LICENSE-2.0
 #Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
-#Version: 3.5.1
-#Date: 2/4/16
+#Version: 3.6
+#Date: 6/29/16
 #Author: Brian Gregor, Oregon Systems Analytics LLC, gregor@or-analytics.com
 
 
@@ -15,7 +15,7 @@
 #2/4/16: 
 #Added tabulation of total parking cashout payments by district, income group, development type, and population type. The new array is named "HhCashout.DiIgDtPp" and is a component of the "Hh_" list.
 #Added tabulation of the number of zero vehicle households. The new array is named NumZeroVehHh.DiIgDtPpHt and is a component of the "Hh_" list.
-#6/27/16:
+#6/29/16:
 #Revised script to tabulate car services travel (e.g. car-sharing and shared autonomous vehicles), autonomous vehicles, and walk, bike and transit trips.
 
 #Define functions for calculating water use and critical air pollutant emissions
@@ -205,6 +205,10 @@ for( yr in RunYears ) {
   Hh_$WaterUse.DiDt <- array( 0, dim=c( length(Di), length(Dt)), dimnames=list(Di,Dt) )
   Hh_$CritAirPol.DiDtPo <- array( 0, dim=c( length(Di), length(Dt), length(Po)), 
                                   dimnames=list(Di,Dt,Po) )
+  Hh_$AuDvmt.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
+  Hh_$NAuDvmt.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ )
+  Hh_$HhVehDvmt.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ ) 
+  Hh_$CarSvcDvmt.DiIgDtPp <- array( 0, dim=OutputDims., dimnames=OutputDimnames_ ) 
   
   #Save metropolitan area summary data tables
   #==========================================
@@ -355,7 +359,7 @@ for( yr in RunYears ) {
     #Hh_$DrvAgePop.DiIgDtPp[Dx, , , ] <- VehHhDrvPop.4d
     rm( VehHhDrvPop.4d )
 
-    # Household Dvmt 
+    # All household and car service DVMT
     Dvmt.4d <- 
       tabulate(SynPop..$Dvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
                list(SynPop..$District, SynPop..$IncGrp, 
@@ -364,6 +368,50 @@ for( yr in RunYears ) {
                "Sum") 
     Hh_$Dvmt.DiIgDtPp[Dx, , , ] <<- Dvmt.4d[Dx, Ig, Dt, Pp]
     #Hh_$Dvmt.DiIgDtPp[Dx, , , ] <- Dvmt.4d[Dx, Ig, Dt, Pp]
+    rm( Dvmt.4d )
+
+    # DVMT in household vehicles
+    Dvmt.4d <- 
+      tabulate(SynPop..$Dvmt, 
+               list(SynPop..$District, SynPop..$IncGrp, 
+                    SynPop..$DevType, PopType.),
+               list(Dx, Ig, Dt, Pp),
+               "Sum")
+    Hh_$HhVehDvmt.DiIgDtPp[Dx, , , ] <<- Dvmt.4d[Dx, Ig, Dt, Pp]
+    #Hh_$HhVehDvmt.DiIgDtPp[Dx, , , ] <- Dvmt.4d[Dx, Ig, Dt, Pp]
+    rm( Dvmt.4d )
+
+    # DVMT from use of car services (includes the repositioning DVMT)
+    Dvmt.4d <- 
+      tabulate(SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
+               list(SynPop..$District, SynPop..$IncGrp, 
+                    SynPop..$DevType, PopType.),
+               list(Dx, Ig, Dt, Pp),
+               "Sum")
+    Hh_$CarSvcDvmt.DiIgDtPp[Dx, , , ] <<- Dvmt.4d[Dx, Ig, Dt, Pp]
+    #Hh_$CarSvcDvmt.DiIgDtPp[Dx, , , ] <- Dvmt.4d[Dx, Ig, Dt, Pp]
+    rm( Dvmt.4d )
+    
+    # DVMT in autonomous vehicles
+    Dvmt.4d <- 
+      tabulate(SynPop..$AuDvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp) * !is.na(CarSvcCostParm..["AVTechCost",yr]), 
+               list(SynPop..$District, SynPop..$IncGrp, 
+                    SynPop..$DevType, PopType.),
+               list(Dx, Ig, Dt, Pp),
+               "Sum")
+    Hh_$AuDvmt.DiIgDtPp[Dx, , , ] <<- Dvmt.4d[Dx, Ig, Dt, Pp]
+    #Hh_$AuDvmt.DiIgDtPp[Dx, , , ] <- Dvmt.4d[Dx, Ig, Dt, Pp]
+    rm( Dvmt.4d )
+
+    # DVMT in non-autonomous vehicles
+    Dvmt.4d <- 
+      tabulate(SynPop..$NAuDvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp) * is.na(CarSvcCostParm..["AVTechCost",yr]), 
+               list(SynPop..$District, SynPop..$IncGrp, 
+                    SynPop..$DevType, PopType.),
+               list(Dx, Ig, Dt, Pp),
+               "Sum")
+    Hh_$NAuDvmt.DiIgDtPp[Dx, , , ] <<- Dvmt.4d[Dx, Ig, Dt, Pp]
+    #Hh_$NAuDvmt.DiIgDtPp[Dx, , , ] <- Dvmt.4d[Dx, Ig, Dt, Pp]
     rm( Dvmt.4d )
 
     # Light Vehicle (e.g. bicycle) Dvmt 

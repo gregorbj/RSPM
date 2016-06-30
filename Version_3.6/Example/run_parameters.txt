@@ -9,7 +9,7 @@ BaseYear = "2010"
 
 #Identify all the model years that could be run
 #----------------------------------------------
-Yr = c( "2005", "2010", "2038")
+Yr = c("2005", "2010", "2038", "2050")
 
 #Specify whether a VMT tax surcharge is to be calculated
 #-------------------------------------------------------
@@ -53,22 +53,22 @@ CommVehDvmtMethod = "HouseholdDvmt"
 #RunTravel = FALSE
 #RunOutputs = FALSE
 #UseSavedRandomSeed = TRUE
-#RunYears = c( "2038" )
+#RunYears = c("2005", "2010", "2038", "2050")
 
 # Uncomment the following lines to run the travel model for the base year and any other specified years without tabulating outputs 
 #---------------------------------------------------------------------------------------------------------------------------------
-RunHhSynthesis = FALSE
-RunTravel = TRUE
-RunOutputs = TRUE
-UseSavedRandomSeed = TRUE
-RunYears = c("2005", "2010", "2038")
+#RunHhSynthesis = FALSE
+#RunTravel = TRUE
+#RunOutputs = TRUE
+#UseSavedRandomSeed = TRUE
+#RunYears = c("2005", "2010", "2038", "2050")
 
 # Uncomment the following lines to create output tabulations without running travel model
 #----------------------------------------------------------------------------------------
-#RunHhSynthesis = FALSE
-#RunTravel = FALSE
-#RunOutputs = TRUE
-#RunYears = c( "2005", "2010", "2038" )
+RunHhSynthesis = FALSE
+RunTravel = FALSE
+RunOutputs = TRUE
+RunYears = c("2005", "2010", "2038", "2050")
 
 
 

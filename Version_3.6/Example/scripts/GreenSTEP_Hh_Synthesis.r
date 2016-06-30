@@ -238,6 +238,11 @@ local( {
             dtj <- UnitsAdd..$Dt[j]
             UnitsAdd_Di.DtHt[[dxj]][dtj,ht] <- UnitsAdd..$NumAdd[j]
             Units_Di.DtHt[[dxj]][dtj,ht] <- Units_Di.DtHt[[dxj]][dtj,ht] + UnitsAdd_Di.DtHt[[dxj]][dtj,ht]
+            #Set any negative values to 0
+            Units_Di.DtHt <- lapply(Units_Di.DtHt, function(x) {
+              x[x < 0] <- 0
+              x
+            })
           }
         }
         # Finish calculation of added units
