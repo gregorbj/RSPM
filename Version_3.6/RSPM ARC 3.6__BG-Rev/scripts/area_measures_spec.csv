@@ -1,0 +1,82 @@
+Measure,Calculation,Units
+PopHousehold,"sum( Pop.DiIgDtPpHt[,,,""Household"",] )",Population in households in MPO boundary
+PopGroupQtr,"sum( Pop.DiIgDtPpHt[,,,""GroupQtr"",] )",Population in group quarters in MPO boundary
+PopTotal,sum( Pop.DiIgDtPpHt ),Total population in MPO boundary
+Households,"sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Households in MPO boundary
+SFD,"sum( Hh.DiIgDtPpHt[,,,,""SFD""] )",Number of single-family detached housing units in MPO boundary
+SFA,"sum( Hh.DiIgDtPpHt[,,,,""SFA""] )",Number of single-family attached housing units in MPO boundary
+MH,"sum( Hh.DiIgDtPpHt[,,,,""MH""] )",Number of mobile home housing units in MPO boundary
+A24,"sum( Hh.DiIgDtPpHt[,,,,""A24""] )",Number of duplex/triplex/quadplex housing units in MPO boundary
+A5P,"sum( Hh.DiIgDtPpHt[,,,,""A5P""] )",Number of apartment housing units in MPO boundary
+GQ,"sum( Hh.DiIgDtPpHt[,,,,""GQ""] )",Number of group quarters residents in MPO boundary
+IncomeCapHousehold,"sum( HhInc.DiIgDtPp[,,,""Household""] )  / Summary_$PopHousehold",Average annual per capita income of MPO households in 2005 dollars
+IncomeCapGroupQtr,"sum( HhInc.DiIgDtPp[,,,""GroupQtr""] ) / Summary_$PopGroupQtr",Average annual per capita income of MPO group quarters population in 2005 dollars
+FuelCost,"Costs.YrCs[Year,""FuelCost""]",2005 Dollars per gasoline equivalent gallon
+FuelTax,"Costs.YrCs[Year,""GasTax""]",2005 Dollars per gasoline equivalent gallon
+LtTruckShare,sum( NumLtTruck.DiIgDtPp ) / sum( NumLtTruck.DiIgDtPp + NumAuto.DiIgDtPp ),Light truck proportion of light vehicle fleet
+DvmtHousehold,"sum( Dvmt.DiIgDtPp[,,,""Household""] )",Total DVMT of MPO households
+DvmtGroupQtr,"sum( Dvmt.DiIgDtPp[,,,""GroupQtr""] )",Total DVMT of MPO group quarters population
+DvmtCommercial,CommVehDvmt,Total DVMT of commercial service vehicles
+DvmtTotal,Summary_$DvmtHousehold + Summary_$DvmtGroupQtr + Summary_$DvmtCommercial,Total DVMT of MPO light duty vehicle travel
+DvmtRoad,"Dvmt.Ty[""LtVeh""]",Total light vehicle DVMT on roads within MPO boundary
+DvmtCapHousehold,Summary_$DvmtHousehold / Summary_$PopHousehold,Average Percapita DVMT of MPO households
+DvmtCapGroupQtr,Summary_$DvmtGroupQtr / Summary_$PopGroupQtr,Average Percapita DVMT of MPO group quarters residents
+DvmtCapRoad,Summary_$DvmtRoad / Summary_$PopTotal,Average Percapita DVMT of light-duty vehicle travel on roads within MPO boundary
+AutonomousDvmt,sum(AuDvmt.DiIgDtPp),Total household and group quarters DVMT by autonomous vehicles (both owned and car service)
+CarServiceDvmt,sum(CarSvcDvmt.DiIgDtPp),Total household and group quarters DVMT using car services.
+PropAutonomousDvmt,Summary_$AutonomousDvmt / (Summary_$DvmtHousehold + Summary_$DvmtGroupQtr),Proportion of household and group quarters DVMT by autonomous vehicles
+PropCarServiceDvmt,Summary_$CarServiceDvmt / (Summary_$DvmtHousehold + Summary_$DvmtGroupQtr),Proportion of household and group quarters DVMT by car services
+Co2eHousehold,"365 * sum( HhCo2e.DiIgDtPp[,,,""Household""] )",Annual metric tons of CO2e emitted by household light-duty vehicles
+Co2eGroupQtr,"365 * sum( HhCo2e.DiIgDtPp[,,,""GroupQtr""] )",Annual metric tons of CO2e emitted by group quarters residents' light-duty vehicles
+Co2eCommercial,365 * CommVehCo2e,Annual metric tons of CO2e emitted by commercial service vehicles
+Co2eTotal,Summary_$Co2eHousehold + Summary_$Co2eGroupQtr + Summary_$Co2eCommercial,Total annual metric tons of CO2e emitted by light-duty vehicles of MPO residents and businesses
+Co2eRoad,Summary_$Co2eTotal * Summary_$DvmtRoad / Summary_$DvmtTotal,Annual metric tons of CO2e emitted by light-duty vehicles traveling on roads in the MPO area
+Co2eCapHousehold,Summary_$Co2eHousehold / Summary_$PopHousehold,Annual percapita metric tons of CO2e emitted by household light-duty vehicles
+Co2eCapGroupQtr,Summary_$Co2eGroupQtr / Summary_$PopGroupQtr,Annual percapita metric tons of CO2e emitted by group quarters residents' light-duty vehicles
+Co2eCapRoad,Summary_$Co2eRoad / Summary_$PopTotal,Annual percapita metric tons of CO2e emitted by light-duty vehicles traveling on roads in the MPO area
+Co2eMileHousehold,( 1e6  * Summary_$Co2eHousehold ) / ( 365 * Summary_$DvmtHousehold ),Household vehicle emissions rate in grams per mile
+Co2eMileGroupQtr,( 1e6  * Summary_$Co2eGroupQtr ) / ( 365 * Summary_$DvmtGroupQtr ),Group quarters resident emissions rate in grams per mile
+Co2eMileCommercial,( 1e6  * Summary_$Co2eCommercial ) / ( 365 * Summary_$DvmtCommercial ),Commercial service vehicle emissions rate in grams per mile
+Co2eMileTotal,( 1e6  * Summary_$Co2eTotal ) / ( 365 * Summary_$DvmtTotal ),Average emissions rate of all light-duty vehicles in grams per mile
+FuelHousehold,"365 * sum( Fuel.DiIgDtPp[,,,""Household""] )",Annual gasoline equivalent gallons of fuel consumed by MPO households
+FuelGroupQtr,"365 * sum( Fuel.DiIgDtPp[,,,""GroupQtr""] )",Annual gasoline equivalent gallons of fuel consumed by MPO group quarters residents
+FuelCommercial,365 * CommVehFuel,Annual gasoline equivalent gallons of fuel consumed by MPO fuel quarters residents
+FuelTotal,Summary_$FuelHousehold + Summary_$FuelGroupQtr + Summary_$FuelCommercial,Annual gasoline equivalent gallons of fuel consumed by MPO commercial service vehicles
+FuelEconomyHousehold,( 365 * Summary_$DvmtHousehold ) / Summary_$FuelHousehold,Average fuel economy (miles per gallon) of MPO household vehicles
+FuelEconomyGroupQtr,( 365 * Summary_$DvmtGroupQtr ) / Summary_$FuelGroupQtr,Average fuel economy (miles per gallon) of MPO group quarters resident vehicles
+FuelEconomyCommercial,( 365 * Summary_$DvmtCommercial ) / Summary_$FuelCommercial,Average fuel economy (miles per gallon) of MPO commercial service vehicles
+FuelEconomyTotal,( 365 * Summary_$DvmtTotal ) / Summary_$FuelTotal,Average fuel economy (miles per gallon) of al MPO light-duty vehicles
+WalkTripsCapHousehold,"365 * sum( WalkTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita walk trips of MPO households
+WalkTripsCapGroupQtr,"365 * sum( WalkTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita walk trips of MPO group quarters residents
+BikeTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
+BikeTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
+TransitTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
+TransitTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
+SovToBikeDiversion,"mean( LtVehParm_Va..$PropSuitable[,Year] )",Target rate of diversion of SOV tours to bike tours
+BikeDvmtCapHousehold,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""Household""] ) / Summary_$PopHousehold",Average annual percapita bike miles of MPO households
+BikeDvmtCapGroupQtr,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""GroupQtr""]  ) / Summary_$PopGroupQtr",Average annual percapita bike miles of MPO group quarters residents
+VehOpCostHousehold,"365 * sum( HhOpCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household vehicle operating cost
+VehOwnCostHousehold,"365 * sum( HhVehOwnCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household vehicle ownership cost
+VehParkingCostHousehold,"365 * sum( HhParkingCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household parking cost
+SocialCostHousehold,"365 * sum( HhExtCost.DiIgDtPp[,,,""Household""] ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household social cost due to vehicle use
+PropWkrPayPkg,"PkgParm_Va..$PropWrkChrgd[,Year] *  PkgParm_Va..$PropWrkPkg[,Year]",Portion of MPO household workers paying for parking
+PropOthPayPkg,"PkgParm_Va..$PropOthChrgd[,Year]",Proportion of other MPO household trips paying for parking
+Hydrocarbons,"LtVehRoadCritAirPol.Po[""Hydrocarbons""]",Daily kilograms of hydrocarbons emitted by MPO residents
+CarbonMonoxide,"LtVehRoadCritAirPol.Po[""CarbonMonoxide""]",Daily kilograms of Carbon Monoxide emitted by MPO residents
+NitrogenOxides,"LtVehRoadCritAirPol.Po[""NitrogenOxides""]",Daily kilograms of Nitrogen Oxides emitted by MPO residents
+PM25,"LtVehRoadCritAirPol.Po[""PM25""]",Daily kilograms of PM 2.5 emitted by MPO residents
+LtVehDelay,"DelayVehHr.Ty[""LtVeh""]",Daily hours of light-duty vehicle delay on MPO area roads
+LtVehDelayCap,365 * Summary_$LtVehDelay / Summary_$PopTotal,Annual percapita hours of light-duty vehicle delay on MPO area roads
+TruckDelay,"DelayVehHr.Ty[""Truck""]",Daily hours of truck delay on MPO area roads
+TransitRevMiCap,TranRevMiCap.Yr[Year],Annual transit revenue miles per capita
+UrbanizedLand,"sum( Acres.DiDt[,c(""Metropolitan"",""Town"")] )",Acres of urbanized land (land designated at metropolitan or town)
+MixedUsePopProp,"sum( Pop.DiDtPpMx[,,,""1""] ) / Summary_$PopTotal",Proportion of MPO population living in mixed-use neighborhoods
+ResWaterCap,"sum( ( WaterUse.DiDt * Pop.DiDt )[,c(""Metropolitan"",""Town"")], na.rm=TRUE ) / sum( Pop.DiDt )",Average percapita water use of MPO residents
+ICE,"sum( NumPowertrain.DiVtPt[,,""Ice""] )",Number of household internal combustion engine vehicles
+HEV,"sum( NumPowertrain.DiVtPt[,,""Hev""] )",Number of household hybrid-electric vehicles
+PHEV,"sum( NumPowertrain.DiVtPt[,,""Phev""] )",Number of household plugin hybrid-electric vehicles
+EV,"sum( NumPowertrain.DiVtPt[,,""Ev""] )",Number of household electric vehicles
+Pct_DvmtCommercial,100 * Summary_$DvmtCommercial / Summary_$DvmtTotal,Percentage of commercial DVMT over the total DVMT
+HTruckDvmt,"Dvmt.Ty[""Truck""]",Total heavy truck DVMT on roads within MPO boundary
+AverageSpeed_ltVeh,"AveSpeed.Ty[""LtVeh""]",Average speed of light vehicle
+AverageSpeed_Htruck,"AveSpeed.Ty[""Truck""]",Average speed of heavy Truck

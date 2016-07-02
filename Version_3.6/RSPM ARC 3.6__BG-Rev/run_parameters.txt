@@ -1,0 +1,77 @@
+#========================
+#GreenSTEP Run Parameters
+#========================
+#This file defines several parameters that how the model run proceeds
+
+#Identify the base year
+#----------------------
+BaseYear = "2015"
+
+#Identify all the model years that could be run
+#----------------------------------------------
+Yr = c( "2015", "2050")
+
+#Specify whether a VMT tax surcharge is to be calculated
+#-------------------------------------------------------
+#Change value to TRUE if a VMT tax surcharge is to be calculated
+CalcVmtSurcharge = FALSE #If TRUE,then the model will calculate and balance out the gas tax and/or added VMT surcharge with costs
+
+#Specify how commercial vehicle travel is to be calculated
+#---------------------------------------------------------
+#If value is "HouseholdDvmt", commercial vehicle travel is calculated from household DVMT
+#If value is "HouseholdIncome", commercial vehicle travel is calculated from household income
+#If the model is used for determining compliance with DLCD target rules, value needs to be set to "HouseholdDvmt"
+CommVehDvmtMethod = "HouseholdDvmt"
+
+# Alternate parameter settings to determine what parts of the model and years will be run
+#========================================================================================
+
+# Uncomment (remove the # mark) the following lines to run and calibrate the base year household synthesis
+# Only set PlotCalibration = TRUE if supporting files and R libraries are present
+# Identify shapefile parameters if a map of calibrated district weights is to be plotted
+# Shapefile is a vector identifying the name of the shapefile (without the .shp extention),
+# the name of the field identifying district names, and the name of the field identifying
+# division names. Comment the line if a shapefile is not present.
+#---------------------------------------------------------------------------------------------------------
+#RunHhSynthesis = TRUE
+#RunTravel = FALSE
+#RunOutputs = FALSE
+#RunYears = "2015"
+#UseSavedRandomSeed = FALSE
+#PlotCalibration = FALSE
+#Shapefile = c(Filename="RVMPO_Districts", DistrictField="DISTRICT", DivisionField="DIVISION")
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------|
+#Before continuing below, for all years, need to copy calibrated income weight values from "calibrated_income_weights.csv" into "income_weights.csv" |
+#in "land_forecasts" foleder. And also need to copy calibrated income proportion value from "calibrated_income_proportions.csv" into                 |
+#"regional_inc_prop.csv" in "model" folder.                                                                                                          |
+#----------------------------------------------------------------------------------------------------------------------------------------------------|  
+
+#Uncomment the following lines to complete the household synthesis for other past and/or future years
+#----------------------------------------------------------------------------------------------------
+#RunHhSynthesis = TRUE
+#RunTravel = FALSE
+#RunOutputs = FALSE
+#UseSavedRandomSeed = TRUE
+#RunYears = c("2050")
+
+# Uncomment the following lines to run the travel model for the base year and any other specified years without tabulating outputs 
+#---------------------------------------------------------------------------------------------------------------------------------
+#RunHhSynthesis = FALSE
+#RunTravel = TRUE
+#RunOutputs = FALSE
+#UseSavedRandomSeed = TRUE
+#RunYears = c("2050") # c(  "2015", "2050" )
+
+# Uncomment the following lines to create output tabulations without running travel model
+#----------------------------------------------------------------------------------------
+RunHhSynthesis = FALSE
+RunTravel = FALSE
+RunOutputs = TRUE
+RunYears = c("2050") #c( "2015", "2050" )
+
+
+
+
+
+

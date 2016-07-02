@@ -1,0 +1,44 @@
+#global_values.txt
+#=================
+#This file defines various global values for the model that are not defined elsewhere.
+
+# Base year annual truck VMT
+BaseTruckVmt =  12775000000
+
+# Transit vehicle mile adjustment
+# Accounts for deadheading to convert transit revenue miles to vehicle miles
+TranAdjFactor = 1.15
+
+# Truck VMT growth multiplier
+TruckVmtGrowthMultiplier = 2
+
+# Megajoules per gallon
+MjPerGallon = 121
+
+# US to metric conversion factors
+PoundToKilogram = 0.45
+
+# Factor to convert DVMT to annual VMT
+AnnVmtInflator = 365
+
+# Base cost per mile of travel (for the base cost year)
+BaseCostPerMile = 0.04
+
+# Base cost year
+BaseCostYear = 2001
+
+# Default budget proportion
+BudgetProp = 0.1
+
+# Factor to estimate commercial service VMT from household VMT (revised in V3.5)
+CommVmtFactor = 0.09
+
+# Value of Time
+ValueOfTime = 16
+
+# Lambda values for metropolitan areas
+Lambda.Ma = c( RVMPO=0.174524  )
+
+# Identify the units in which land area is measured (comment and uncomment the appropriate lines)
+AreaUnits = "acres"
+#AreaUnits = "sqmi"

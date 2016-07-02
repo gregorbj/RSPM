@@ -1,0 +1,16 @@
+Parameter,2005,2015,2038,2050,CostDataYear
+TotSvcMiles,250000,250000,250000,250000,NA
+RepoProp,0.1,0.1,0.1,0.1,NA
+SvcYears,4,4,2,2,NA
+VehCost,20000,20000,20000,20000,2012
+AVTechCost,NA,NA,15000,1500,2012
+InterestRate,0.05,0.05,0.05,0.05,NA
+InsuranceCost,9000,9000,3000,3000,2012
+Registration,600,600,600,600,2012
+Overhead,1000,1000,1000,1000,2012
+Cleaning,5200,5200,5200,5200,2012
+ProfitContingencies,0.2,0.2,0.2,0.2,NA
+OccAdj,1,1,1,1,NA
+RefDensity,7000,7000,7000,7000,NA
+PropEV,0,0,0.5,1,NA
+EfficiencyIncrease,1,1,1,1,NA

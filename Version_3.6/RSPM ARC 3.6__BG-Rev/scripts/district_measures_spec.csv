@@ -1,0 +1,10 @@
+Measure,Calculation,Units
+PopHousehold,"apply( Pop.DiIgDtPpHt[,,,""Household"",], 1, sum )",Population in households in MPO boundary
+PopGroupQtr,"apply( Pop.DiIgDtPpHt[,,,""GroupQtr"",], 1, sum )",Population in group quarters in MPO boundary
+IncomeCapHousehold,"apply(HhInc.DiIgDtPp[,,,""Household""], 1, sum )  / apply( Pop.DiIgDtPpHt[,,,""Household"",], 1, sum )",Average annual per capita income of MPO households in 2005 dollars
+DvmtCapHousehold,"apply( Dvmt.DiIgDtPp[,,,""Household""], 1, sum ) / apply( Pop.DiIgDtPpHt[,,,""Household"",], 1, sum )",Average Percapita DVMT of MPO households
+Co2eCapHousehold,"365 * apply( HhCo2e.DiIgDtPp[,,,""Household""], 1, sum ) / apply( Pop.DiIgDtPpHt[,,,""Household"",], 1, sum )",Annual percapita metric tons of CO2e emitted by household light-duty vehicles
+VehOpCostHousehold,"365 * apply( HhOpCost.DiIgDtPp[,,,""Household""], 1, sum  ) / apply( Hh.DiIgDtPpHt[,,,""Household"",], 1, sum )",Average annual MPO household vehicle operating cost
+VehOwnCostHousehold,"365 * apply( HhVehOwnCost.DiIgDtPp[,,,""Household""], 1, sum  ) / apply( Hh.DiIgDtPpHt[,,,""Household"",], 1, sum )",Average annual MPO household vehicle ownership cost
+SocialCostHousehold,"365 * apply( HhExtCost.DiIgDtPp[,,,""Household""], 1, sum ) / apply( Hh.DiIgDtPpHt[,,,""Household"",], 1, sum )",Average annual MPO household social cost due to vehicle use
+MixedUsePopProp,"apply( Pop.DiDtPpMx[,,,""1""], 1, sum ) / apply( Pop.DiIgDtPpHt, 1, sum )",Proportion of MPO population living in mixed-use neighborhoods

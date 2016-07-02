@@ -259,7 +259,7 @@ for( yr in RunYears ) {
     ModelVar. <- c( "DrvAgePop", "Houseid" )
     for( dx in Dx ) {
       IsDistrict. <- SynPop..$District == dx
-      if( any( IsDistrict. ) ){
+      if( sum( IsDistrict. > 5) ){
         SynPop..$NumEco[ IsDistrict. ] <- idEcoWorkers( SynPop..[ IsDistrict., ModelVar. ],
                                                         PropWrkEco=PropWrkEco.MdYr[ md, yr ] )
       }
@@ -280,7 +280,7 @@ for( yr in RunYears ) {
       rm( IsDistrict. )
     }
     rm( ModelVar. )
-    
+   
     # Identify eco-driver and low rolling-resistance tire households
     #---------------------------------------------------------------
     # Note: reason for form of 1st argument is to pass a data frame with
@@ -419,7 +419,7 @@ for( yr in RunYears ) {
                     "Age55to64", "Age65Plus", "VehPerDrvAgePop", "DrvAgePop" )
     for( dx in Dx ) {
       IsDistrict. <- SynPop..$District == dx
-      if( sum( IsDistrict. ) > 1 ) {
+      if( sum( IsDistrict. ) > 5 ) {
         LtVehOwn.Hh[ IsDistrict. ] <- predictLightVehicles( SynPop..[ IsDistrict., ModelVar. ],
                                                             LtVehOwnModels_=LtVehOwnModels_, Type="Metro",
                                                             TargetProp=LtVehParm_Va..$OwnRatio[ dx, yr ] )
@@ -632,6 +632,7 @@ for( yr in RunYears ) {
     ModelVar. <- c( "Houseid", "Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", 
                     "Age65Plus", "Dvmt", "Hhvehcnt", "Hhincttl", "VehType", "VehAge" )
     PaydWeights.Hh <- estPaydWeights( Data..=SynPop..[ModelVar.], yr=yr)
+    PaydWeights.Hh[is.na(PaydWeights.Hh)] <- 0
     SynPop..$Payd <- selectFromWeights(PaydWeights.Hh, PropToSelect=Payd..Yr["Proportion", yr])
     rm(ModelVar., PaydWeights.Hh)
     gc()
@@ -703,13 +704,15 @@ for( yr in RunYears ) {
                       "VehMpkwh", "Dvmt" )
       for( dx in Dx ) {
         IsDistrict. <- SynPop..$District == dx 
-        FuelElecCo2e_ <- calcVehFuelElecCo2( SynPop..[ IsDistrict., ModelVar. ], AveFuelCo2e.=AveFuelCo2e.LdYr[,yr],
-                                             AveElectricCo2e=AveElectricCo2e.DiYr[dx,yr], CsharEffFactor=1 )
-        SynPop..$FuelGallons[ IsDistrict. ] <- FuelElecCo2e_$FuelGallons
-        SynPop..$FuelCo2e[ IsDistrict. ] <- FuelElecCo2e_$FuelCo2e
-        SynPop..$ElecKwh[ IsDistrict. ] <- FuelElecCo2e_$ElecKwh
-        SynPop..$ElecCo2e[ IsDistrict. ] <- FuelElecCo2e_$ElecCo2e
-        rm( FuelElecCo2e_ )
+        if (sum(IsDistrict. > 0)) {
+          FuelElecCo2e_ <- calcVehFuelElecCo2( SynPop..[ IsDistrict., ModelVar. ], AveFuelCo2e.=AveFuelCo2e.LdYr[,yr],
+                                               AveElectricCo2e=AveElectricCo2e.DiYr[dx,yr], CsharEffFactor=1 )
+          SynPop..$FuelGallons[ IsDistrict. ] <- FuelElecCo2e_$FuelGallons
+          SynPop..$FuelCo2e[ IsDistrict. ] <- FuelElecCo2e_$FuelCo2e
+          SynPop..$ElecKwh[ IsDistrict. ] <- FuelElecCo2e_$ElecKwh
+          SynPop..$ElecCo2e[ IsDistrict. ] <- FuelElecCo2e_$ElecCo2e
+          rm( FuelElecCo2e_ )
+        }
       }
       rm( ModelVar. )
       gc()

@@ -1,0 +1,10 @@
+Msa,TDMProgram,DataItem,2005,2015,2038,2050
+RVMPO,Ridesharing,RidesharingParticipation,0,0.01,0.069,0.1
+RVMPO,TransitSubsidy,TransitSubsidyParticipation,0,0.65,0.011,0.13
+RVMPO,TransitSubsidy,TransitSubsidyLevel,0,1.6,1.6,1.6
+RVMPO,WorkSchedule,Schedule980Participation,0,0,0,0
+RVMPO,WorkSchedule,Schedule440Participation,0,0,0,0
+RVMPO,WorkSchedule,Telecommute1.5DaysParticipation,0,0.1,0,0.2
+RVMPO,Vanpooling,LowLevelParticipation,0,0,0,0
+RVMPO,Vanpooling,MediumLevelParticipation,0,0,0,0
+RVMPO,Vanpooling,HighLevelParticipation,0,0,0,0
