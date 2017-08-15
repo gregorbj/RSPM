@@ -1,0 +1,2 @@
+"income_weights.csv" file needs to be updated in the right "District and Type" format as the "land_supply.csv" file
+   Need to double-check with Tara for values of the "year" columns. Right now, those values are dummy values. 
