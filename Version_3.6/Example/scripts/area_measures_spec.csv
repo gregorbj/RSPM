@@ -50,8 +50,8 @@ WalkTripsCapHousehold,"365 * sum( WalkTrips.DiDtPpMx[,,""Household"",] ) / Summa
 WalkTripsCapGroupQtr,"365 * sum( WalkTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita walk trips of MPO group quarters residents
 BikeTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
 BikeTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
-TransitTripsCapHousehold,"365 * sum( BikeTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
-TransitTripsCapGroupQtr,"365 * sum( BikeTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
+TransitTripsCapHousehold,"365 * sum( TransitTrips.DiDtPpMx[,,""Household"",] ) / Summary_$PopHousehold",Average annual percapita bike trips of MPO households
+TransitTripsCapGroupQtr,"365 * sum( TransitTrips.DiDtPpMx[,,""GroupQtr"",] ) / Summary_$PopGroupQtr",Average annual percapita bike trips of MPO group quarters residents
 SovToBikeDiversion,"mean( LtVehParm_Va..$PropSuitable[,Year] )",Target rate of diversion of SOV tours to bike tours
 BikeDvmtCapHousehold,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""Household""] ) / Summary_$PopHousehold",Average annual percapita bike miles of MPO households
 BikeDvmtCapGroupQtr,"365 * sum( LtWtVehDvmt.DiIgDtPp[,,,""GroupQtr""]  ) / Summary_$PopGroupQtr",Average annual percapita bike miles of MPO group quarters residents
@@ -59,8 +59,8 @@ VehOpCostHousehold,"365 * sum( HhOpCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.
 VehOwnCostHousehold,"365 * sum( HhVehOwnCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household vehicle ownership cost
 VehParkingCostHousehold,"365 * sum( HhParkingCost.DiIgDtPp[,,,""Household""]  ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household parking cost
 SocialCostHousehold,"365 * sum( HhExtCost.DiIgDtPp[,,,""Household""] ) / sum( Hh.DiIgDtPpHt[,,,""Household"",] )",Average annual MPO household social cost due to vehicle use
-PropWkrPayPkg,"PkgParm_Va..$PropWrkChrgd[,Year] *  PkgParm_Va..$PropWrkPkg[,Year]",Portion of MPO household workers paying for parking
-PropOthPayPkg,"PkgParm_Va..$PropOthChrgd[,Year]",Proportion of other MPO household trips paying for parking
+PropWkrPayPkg,"mean(PkgParm_Va..$PropWrkChrgd[,Year] *  PkgParm_Va..$PropWrkPkg[,Year])",Portion of MPO household workers paying for parking
+PropOthPayPkg,"mean(PkgParm_Va..$PropOthChrgd[,Year])",Proportion of other MPO household trips paying for parking
 Hydrocarbons,"LtVehRoadCritAirPol.Po[""Hydrocarbons""]",Daily kilograms of hydrocarbons emitted by MPO residents
 CarbonMonoxide,"LtVehRoadCritAirPol.Po[""CarbonMonoxide""]",Daily kilograms of Carbon Monoxide emitted by MPO residents
 NitrogenOxides,"LtVehRoadCritAirPol.Po[""NitrogenOxides""]",Daily kilograms of Nitrogen Oxides emitted by MPO residents
