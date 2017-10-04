@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Brian Gregor" />
+  <meta name="date" content="2016-07-21" />
+  <title>RSPM Design for Incorporating Autonomous Vehicles and Autonomous and Non-Autonomous Car Services</title>
+  <style type="text/css">code{white-space: pre;}</style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">RSPM Design for Incorporating Autonomous Vehicles and Autonomous and Non-Autonomous Car Services</h1>
+<h2 class="author">Brian Gregor</h2>
+<h3 class="date">July 21, 2016</h3>
+</div>
+<h3 id="design-for-incorporating-autonomous-vehicles-and-autonomous-and-non-autonomous-car-services-in-the-regional-strategic-planning-model-rspm">Design for Incorporating Autonomous Vehicles and Autonomous and Non-Autonomous Car Services in the Regional Strategic Planning Model (RSPM)</h3>
+<p><strong>Brian Gregor</strong><br />
+<strong>July 21, 2016</strong></p>
+<h3 id="implications-of-autonomous-vehicles-for-strategic-modeling">Implications of Autonomous Vehicles for Strategic Modeling</h3>
+<p>Substantial advancements have been made in the development of self-driving cars in just a few years. About twelve years ago (2004) the farthest that a vehicle drove autonomously in DARPA's Grand Challenge was 7 miles. The following year the 150 mile course was navigated successfully by 5 vehicles. Two years later, in DARPA's Urban Challenge, 6 autonomous vehicles traveled through an urban course, sucessfully following the rules of the road and navigating obstacles and traffic <a href="#fagnant-2015">(Fagnant 2015)</a>. In 2009, Google started working on their self-driving car project. Six years later (May 2016) Google cars had driven over a million and a half miles in autonomous mode <a href="#google-2016a">(Google 2016a)</a>. Google is by no means the only company working on developing self-driving cars, many others including Tesla, GM, Daimler, Volvo, Ford, Jaguar Land Rover, Audi, and BMW are actively working on automated vehicles<a href="#gibbs-2016">(Gibbs 2016)</a>. The rapid pace of autonomous vehicle research and development has lead some people to predict that self-driving cars will be on the road within a few years: 2 years according to Eldon Musk, the CEO of Tesla Motors, and by 2020 according to the president of GM and the CEO of Nissan Motor Corporation <a href="#yadron-2016">(Yadron 2016)</a>. At that pace, most of vehicles on the road could be self-driving within a few decades. Even skeptical analysts think that a majority of vehicle sales and travel could be of autonomous vehicles by the middle of the century <a href="litman-2015">(Litman 2015)</a>.</p>
+<p>Given that self-driving cars could make up a substantial portion of the vehicle fleet within the next 20 to 30+ years, it is important for transportation planners to consider the implications of autonomous vehicles (AVs) and for strategic planning models to be able to assess the implications. However, until Version 3.6, the RSPM did not include these capabilities because, at the time most of the model's components were being designed and estimated, autonomous vehicle research was still in its infancy. Prospects for autonomous vehicles were highly speculative and quantitative analysis of the implications was very limited. This has changed within the past few years and now there is sufficient information to be able to add simple capabilities for modeling autonomous vehicles to the RSPM.</p>
+<p>The effect of AVs on the transportation system will depend on the level of autonomy that is achieved. The National Highway Traffic Safety Administration (NHTSA) identified 5 levels of autonomy in its preliminary policy on autonomous vehicles <a href="#nhtsa-2013">(NHTSA 2013)</a>:<br />
+* Level 0 (No Automation): The driver is in complete and sole control of the primary vehicle controls – brake, steering, throttle, and motive power – at all times.<br />
+* Level 1 (Function-specific Automation): Automation at this level involves one or more specific control functions. Examples include electronic stability control or pre-charged brakes, where the vehicle automatically assists with braking to enable the driver to regain control of the vehicle or stop faster than possible by acting alone.<br />
+* Level 2 (Combined Function Automation): This level involves automation of at least two primary control functions designed to work in unison to relieve the driver of control of those functions. An example of combined functions enabling a Level 2 system is adaptive cruise control in combination with lane centering.<br />
+* Level 3 (Limited Self-Driving Automation): Vehicles at this level of automation enable the driver to cede full control of all safety-critical functions under certain traffic or environmental conditions and in those conditions to rely heavily on the vehicle to monitor for changes in those conditions requiring transition back to driver control. The driver is expected to be available for occasional control, but with sufficiently comfortable transition time. The Google car is an example of limited self-driving automation.<br />
+* Level 4 (Full Self-Driving Automation): The vehicle is designed to perform all safety-critical driving functions and monitor roadway conditions for an entire trip. Such a design anticipates that the driver will provide destination or navigation input, but is not expected to be available for control at any time during the trip. This includes both occupied and unoccupied vehicles.</p>
+<p>At levels 1 and 2, vehicle automation assists the driver with some driving tasks, but the driver must still maintain control of the vehicle at all times. This automation is included in some vehicles now being sold: blind-spot warning, lane departure warning, forward collision warning and braking, automated parking, lane keep assist, adaptive cruise control. These features are likely to improve traffic safety by reducing crashes due to driver error <a href="fagnant-2015">(Fagnant 2015)</a>. Reducing crashes will have a secondary effect on reducing incident-related delay, but is unlikely to have much effect highway capacity. It is also unlikely to have much effect on travel demand because human drivers must still remain in control of their vehicles.</p>
+<p>At levels 3 and 4, vehicle automation takes full control of vehicle guidance and operation. The difference being that with level 3, the driver has to be prepared to take over control whereas with level 4 the driver does not. These features, at least at level 4, promise to increase highway capacity as well as highway safety because vehicles will be able to communicate with one-another and with infrastructure to increase traffic density and smooth traffic flow while reducing delay <a href="fagnant-2015">(Fagnant 2015)</a>. It is likely that full vehicle automation will also affect vehicle travel demand for several reasons. First if the driving task is made less onerous and if people can use the time traveling for other activities, they will be more likely to travel by personal automobile and to travel farther than they otherwise would. Second, if capacity is increased, then travel speed would be higher than it otherwise would be. This would encourage more dispersion of trip origins and destinations and more VMT. Third, it opens up the possibility of a new travel mode, shared autonomous vehicles (SAV), which provides on-demand taxi-like service at costs that are competitive with private vehicle ownership <a href="burns-2013">(Burns 2013)</a>. This mode will enable many households to have widespread urban mobility without owning a car. It will also increase the mobility of many people who can't drive because of age, physical disability, or income <a href="levinson-2015">(Levinson 2015)</a>.</p>
+<p>As was mentioned, vehicles with levels 1 and 2 automation are already on the roadway. These features are likely to decline in price and be available on a wider selection of vehicles in the next few years, acquainting motorists with vehicle automation and increasing demand for even greater automation. Whether or not level 3 is the next step, or whether manufacturers move directly to level 4 is a matter of debate. Google, which has logged over a million miles of level 3 testing has determined that the technology that is provided for public consumption should be level 4 because of the difficulty of keeping drivers as attentive as they need to be to take control of the vehicle when needed. The company has determined that maintaining driver attentiveness will be more difficult than making a vehicle fully automated so that attentiveness is unnecessary <a href="#crothers-2015">(Crothers 2015)</a>. Ford is taking the same approach although some other car companies are trying to develop systems that would enable level 3 vehicles to work safely <a href="#davies-2015">(Davies 2015)</a>.</p>
+<p>Whether level 4 vehicle automation is deployed through fleets of SAVs or through personally-owned AVs, is also open to debate. Although the use of car-sharing services (e.g. Car-to-Go, Zipcar) has been growing, as have car driving services (e.g. Uber, Lyft), the proportion of trips served by them is still quite low and auto ownership is popular for a number of reasons. This suggests that the main market for AVs will be households. On the other hand, other economic and use considerations provide compelling arguments that SAVs could be the main market. Level 4 AV technology at present is not cheap. The AV technology in Google cars costs about $150,000 (LIDAR is about half the cost) <a href="#google-2016b">(Google 2016b)</a>. Even a ten-fold decrease in cost would still leave a $15,000 price tag. That is large price boost for all but the highest income households to absorb, especially considering that the average household vehicle is only in use about an hour a day <a href="#burns-2013">(Burns 2013)</a>. On the other hand, level 4 AV technology makes economic sense for automated taxi services because it would eliminate the labor cost for driving the vehicle and the added cost would be amortized over a period of almost continuous use. For example, Fagnant and Kockelman estimated that a SAV system serving about 50 thousand daily person trips in the Austin metropolitan area could realize a 19% annual return on investment with AV cars costing $70,000 ($50,000 for the AV technology) at fares of $1.00 per mile (less than a third of the current taxi fare) <a href="#fagnant-2016">(Fagnant 2016)</a>. It is telling that Uber has gotten into the business of developing self-driving cars <a href="#obrien-2016">(O'Brien 2016)</a> and that GM is investing $500 million in Lyft <a href="#alba-2016">(Alba 2016)</a>.</p>
+<p>Whether self-driving cars are purchased more by households or by SAV companies has substantial consequences for the structure of the light-duty vehicle fleet and the rate at which it turns over, and consequently for the rate of new technology adoption. Although a SAV future scenario has the potential for greatly reducing the total number of light-duty vehicles on the road, VMT may not decrease and neither may the number of vehicles purchased each year. Several SAV modeling studies have estimated that each SAV could replace over 10 vehicles <a href="#burns-2013">(Burns 2013)</a><a href="fagnant-2014">(Fagnant 2014)</a><a href="fagnant-2016">(Fagnant 2016)</a>. The number of vehicles replaced would not be as high if the SAVs are electric (SAEV)<a href="chen-2016a">(Chen 2016a)</a>. These studies also show that a smaller vehicle fleet will not necessarily translate into less VMT because unlike household vehicles, the SAVs will be in almost continuous use. In fact, VMT may increase as a consequence of SAV travel between dropping off a customer and picking up the next one. This has substantial implications for vehicle turnover and technology advancement. Currently If each SAV replaces 10 vehicles, and if the total VMT driven is the same, then the lifetime of SAVs would be about a tenth of the lifetime of the household vehicles that they replace. This would greatly increase the rate at which newer, more fuel-efficient, vehicles would get on roadways.</p>
+<h3 id="design-for-incorporating-autonomous-vehicles-and-car-services-into-the-rspm">Design for Incorporating Autonomous Vehicles and Car Services into the RSPM</h3>
+<p>The RSPM model has been modified to enable users to model level 4 automation scenarios. The model does not model levels 1, 2, or 3 autonomous vehicles. There are several reasons for this. First, level 1 and 2 automation is likely to have relatively small effects on transportation system operation and use aside from reducing vehicle crashes. Level 3 is not being modeled because it is unclear to what extent it will be deployed, given that several big players (e.g. Google, Ford) have determined that it will be very difficult to maintain driver attentiveness when the vehicle is in autonomous mode. In the longer term, it is level 4 automation that's most likely exist and substantially affect transportation by affecting roadway capacity, vehicle ownership, vehicle characteristics, and rates of vehicle turnover.</p>
+<p>The model has also been modified to model autonomous as well as non-autonomous car services. The previous car-sharing model has been replaced. The new model addresses autonomous and non-autonomous car sharing in a consistent framework which compares the cost of using these services with the marginal cost of vehicle ownership to determine which households would use the services and how many fewer cars they would own as a consequence.</p>
+<h4 id="modeling-shared-vehicle-use-and-automated-vehicle-ownership">Modeling Shared Vehicle Use and Automated Vehicle Ownership</h4>
+<p>The overall approach to determining which households use car services is to compare the marginal per-mile ownership of each vehicle the household owns with the per-mile cost of using a car service for an equivalent value car. For each household, the increase in VMT with each added car owned is calculated. This is divided into the cost of owning a car to calculate the marginal per-mile ownership cost. This cost for each vehicle is compared with the equivalent per-mile cost of using a car service. The household retains vehicles that have lower marginal ownership costs and eliminates vehicles that have higher marginal costs. Typically when a household gets the first vehicle, their VMT increases much more than when they add subsequent vehicles to their household fleet.</p>
+<p>This marginal cost approach is more valid than an average cost approach because households make choices at the margin (to own one more car or one less car), and because vehicle travel and vehicle ownership costs don't scale uniformly. For example, doubling the number of cars owned does not double the miles driven. This can be seen in Table 1 which shows how the average daily vehicle miles per driving age person varies with the number of driving age persons in the household and number of household vehicles. The values are tabulated from a metropolitan area household dataset derived from the 2001 National Household Travel Survey. It can be seen that in most cases the additional miles driven per person increase at a declining rate as the number of household vehicles increases from zero to the same number of vehicles as driving age persons. For example, in the case of 2-driver households, going from one vehicle to two increases miles per driver from 16.2 to 30.2, not to 32.4. In the case of 3-driver households, going from one vehicle to three increases miles per driver from 13.3 to 29.8, not to 39.9. Consequently, the cost per mile traveled of owning an additional car increases as the number of cars owned increases.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Drv/Veh</th>
+<th align="left">1-Veh</th>
+<th align="left">2-Veh</th>
+<th align="left">3-Veh</th>
+<th align="left">4-Veh</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1-Drv</td>
+<td align="left">26.7</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+</tr>
+<tr class="even">
+<td align="left">2-Drv</td>
+<td align="left">16.2</td>
+<td align="left">30.2</td>
+<td align="left">-</td>
+<td align="left">-</td>
+</tr>
+<tr class="odd">
+<td align="left">3-Drv</td>
+<td align="left">13.3</td>
+<td align="left">22.7</td>
+<td align="left">29.8</td>
+<td align="left">-</td>
+</tr>
+<tr class="even">
+<td align="left">4-Drv</td>
+<td align="left">12.4</td>
+<td align="left">16.4</td>
+<td align="left">22.6</td>
+<td align="left">29.5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 1. Comparison of Miles Driven per Driving Age Person by Number of Driving Age Persons and Number of Household Vehicles</strong></p>
+<p>To model the marginal change in VMT with auto ownership, the VMT model is applied for each household at ownship levels of 0, 1, 2, and 3 vehicles. For households that own more than 3 vehicles, the marginal change from 2 to 3 vehicles is used for all vehicles beyond 3. The marginal costs per mile for owning a reference vehicle are then compared to the cost per mile of using a car service to determine the level of vehicle ownership where the marginal cost of owning is less then the cost of using a car service. This is only done for households that have car services available. Scenario inputs determine by district, the proportion of households that would have car services available.</p>
+<p>The marginal comparison is made on the basis of household vehicle ownership costs and corresponding car service costs. This includes all costs exclusive of the costs of fuel, tires, and vehicle repair and maintenance (excluding cleaning). Those costs (operating costs) are excluded for several reasons:<br />
+1. The per-mile operating costs are likely to be fairly similar for household vehicles and car service vehicles. Differences would be small compared to the ownership costs.<br />
+2. The operating costs are only known after all the household vehicle characteristics and pricing policies are determined by the model. Using operating costs as well as ownership costs would require running the entire model in several iterations, greatly increasing the run time. 3. The purpose of this model is to adjust vehicle ownership.<br />
+4. The use of household vehicles and car services is still limited by the household budget for vehicle operating cost. Therefore, while this model could identify a potential for a significant amount of household travel by car services, the final amount could be less for some households because of household budget constraints.</p>
+<h5 id="calculating-household-vehicle-ownership-cost">Calculating Household Vehicle Ownership Cost</h5>
+<p>Household vehicle costs are typically grouped into operating costs and ownership costs. Operating costs vary with the miles driven and include fuel, tire and maintenance costs. Vehicle ownership costs vary with the vehicles owned and not with the miles driven. They include depreciation, financing, insurance, and vehicle licensing/registration/taxes. Following is the approach to calculating each of these costs.<br />
+* Depreciation is the decrease in value of the vehicle with time. According to <a href="#nada-2013">(NADA 2013)</a>, vehicles depreciate at about 15% per year (NADA 2013). The actual amount of depreciation depends on the value of the car and the period over which depreciation occurs. The value of the car is set in the input file, but the value should be the same as the value assumed for the car service (exclusive of autonomous vehicle or other special equipment) so that the analysis is consistent. The depreciation period is the first 5 years of the vehicle life, consistent with the approach used by the American Automobile Association to calculate the cost of driving <a href="aaa-2012">(AAA 2012)</a>.<br />
+* The financing cost depends on the vehicle cost and interest rate. This can be specified by the user, but the interest rate should be consistent with the value used for calculating car service financing cost. The total financing cost, assuming the 4-year purchase period, is divided by 5 to put it on the same annual basis as the depreciation cost.<br />
+* The insurance amount is fixed at the average vehicle cost published by AAA. It is not varied with vehicle price because insurance rates depend on a number of other factors that may or may not vary with price such as risk of theft and relative vehicle safety. Although AAA estimates vary by vehicle size and type, the variation from the average is relatively small (plus or minus 10%).<br />
+* The vehicle licensing/registration/taxes cost has a stronger relationship to value than insurance. The ratio of AAA estimated cost to estimated vehicle depreciation is about 17% for most of the categories. This ratio is used to calculate the cost.<br />
+* The cost of parking is also included in the ownership cost because it can be a significant cost of using a vehicle that one owns, compared to using a car service. The cost of parking is calculated by the parking sub-module of the RSPM.</p>
+<p>These ownership costs differ with respect to autonomous vehicles (AV) vs. non-autonomous vehicles. Autonomous vehicles are more costly to purchase because of the added technical equipment required for them to operate autonomously. The cost of autonomous vehicle equipment is a separate line item in the &quot;hh_veh_own_cost_parm.csv&quot; input file. Autonomous vehicles also can produce some cost savings. Autonomous vehicles are likely to have lower insurance costs because they are likely to have lower crash rates and because the cost of crashes when driving autonomously might be the responsibility of the auto manufacturers. Parking cost is also likely to be lower because the autonomous vehicle user will be able to dispatch their vehicle to a lower cost, or free, parking location. There are inputs that can be used to specify these discounts.</p>
+<p>The following table lists the input variables in the household ownership cost table and provides a brief description of each:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Parameter</th>
+<th align="left">Example</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">VehCost</td>
+<td align="left">20000</td>
+<td align="left">The price of a vehicle comparable to car services</td>
+</tr>
+<tr class="even">
+<td align="left">AVTechCost</td>
+<td align="left">10000</td>
+<td align="left">The cost of autonomous vehicle technology</td>
+</tr>
+<tr class="odd">
+<td align="left">YearsFinanced</td>
+<td align="left">4</td>
+<td align="left">Number of years vehicle is financed</td>
+</tr>
+<tr class="even">
+<td align="left">DepreciationRate</td>
+<td align="left">0.15</td>
+<td align="left">Depreciation rate per year (15% = 0.15)</td>
+</tr>
+<tr class="odd">
+<td align="left">InterestRate</td>
+<td align="left">0.05</td>
+<td align="left">Interest rate per year (5% = 0.5)</td>
+</tr>
+<tr class="even">
+<td align="left">InsuranceCost</td>
+<td align="left">1000</td>
+<td align="left">Annual insurance cost</td>
+</tr>
+<tr class="odd">
+<td align="left">AVInsDiscProp</td>
+<td align="left">0.75</td>
+<td align="left">Discount of insurance cost (0.75 means 25% of cost is avoided)</td>
+</tr>
+<tr class="even">
+<td align="left">AVPkgDiscProp</td>
+<td align="left">0.5</td>
+<td align="left">Discount of parking cost (0.5 means 50% of cost is avoided)</td>
+</tr>
+<tr class="odd">
+<td align="left">AVTripVmtAdj</td>
+<td align="left">1.2</td>
+<td align="left">VMT multiplier for AV to account for greater travel comfort and convenience</td>
+</tr>
+<tr class="even">
+<td align="left">AVRepoVmtAdj</td>
+<td align="left">1.2</td>
+<td align="left">VMT multiplier for AV to account for repositioning travel (e.g. to avoid parking charges)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="modeling-car-service-cost">Modeling Car Service Cost</h5>
+<p>The shared service mileage cost is calculated to be comparable to the household marginal ownership cost. It includes all costs other than fuel, tires, and vehicle maintenance (other than cleaning). The included costs are vehicle price, cost of autonomous vehicle technology, financing, insurance, registration, administrative overhead (e.g. dispatch, billing, ...), vehicle cleaning, profit, and contingencies.</p>
+<p>The cost per mile depends on the service miles of the vehicle (default is 250,000 miles) and the proportion of miles in non-revenue service due to travel from dropping off one passenger and picking up the next one. Several simulation studies of shared autonomous vehicles have estimated non-revenue service to be about 10% of the total miles. The proportion of non-revenue service increases as population density decreases. The model assumes that the proportion of non-revenue service chances in inverse proportion to the square root of population density (e.g. decreasing density 4 times doubles the proportion of non-revenue service).</p>
+<p>The following table lists the input variables (&quot;car_svc_cost_parm.csv&quot; file) in the car service cost table and provides a brief description of each:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Parameter</th>
+<th align="left">Example</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TotSvcMiles</td>
+<td align="left">250000</td>
+<td align="left">Service life of vehicle in miles</td>
+</tr>
+<tr class="even">
+<td align="left">RepoProp</td>
+<td align="left">0.1</td>
+<td align="left">Non-revenue mileage proportion at reference density (10% = 0.1)</td>
+</tr>
+<tr class="odd">
+<td align="left">SvcYears</td>
+<td align="left">2</td>
+<td align="left">Service life of vehicle in years</td>
+</tr>
+<tr class="even">
+<td align="left">VehCost</td>
+<td align="left">20000</td>
+<td align="left">The price of a vehicle</td>
+</tr>
+<tr class="odd">
+<td align="left">AVTechCost</td>
+<td align="left">10000</td>
+<td align="left">The cost of autonomous vehicle technology (NA for ordinary car-share)</td>
+</tr>
+<tr class="even">
+<td align="left">InterestRate</td>
+<td align="left">0.05</td>
+<td align="left">Interest rate per year (5% = 0.5)</td>
+</tr>
+<tr class="odd">
+<td align="left">InsuranceCost</td>
+<td align="left">3000</td>
+<td align="left">Annual cost of insurance</td>
+</tr>
+<tr class="even">
+<td align="left">Registration</td>
+<td align="left">600</td>
+<td align="left">Annual cost of vehicle registration</td>
+</tr>
+<tr class="odd">
+<td align="left">Overhead</td>
+<td align="left">1000</td>
+<td align="left">Annual overhead cost</td>
+</tr>
+<tr class="even">
+<td align="left">Cleaning</td>
+<td align="left">5200</td>
+<td align="left">Annual cleaning cost</td>
+</tr>
+<tr class="odd">
+<td align="left">ProfitContingencies</td>
+<td align="left">0.2</td>
+<td align="left">Added proportion for profit/contingencies (20% = 0.2)</td>
+</tr>
+<tr class="even">
+<td align="left">OccAdj</td>
+<td align="left">1.05</td>
+<td align="left">Average occupancy relative to average occupancy of household vehicles</td>
+</tr>
+<tr class="odd">
+<td align="left">RefDensity</td>
+<td align="left">7000</td>
+<td align="left">Population density corresponding to the specified non-revenue mileage proportion</td>
+</tr>
+<tr class="even">
+<td align="left">EfficiencyIncrease</td>
+<td align="left">1.1</td>
+<td align="left">Efficiency factors due to light weighting, etc. (1.1 means 10% more efficient)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="modeling-the-effects-on-vmt">Modeling the Effects on VMT</h4>
+<p>Level 4 automated vehicles are likely to affect VMT in several ways including: 1. Improved automobile accessibility due to increased freeway capacity (and speed) is likely to increase automobile use and distance traveled. 2. Eliminating the need to drive will make traveling by car less onerous and relatively more desirable. 3. Self-driving cars will make it possible for people who can't drive because of age, physical disability, or income to be able to travel by car without being chauffeured by another person. 4. A household owning an autonomous vehicle may send it unaccompanied to destinations to avoid paying for parking or for other purposes. 5. SAV vehicles will need to travel additional miles to get between customers. 6. Travel by SAV will have a higher variable cost than traveling by a household-owned vehicle (which has higher sunk cost and lower variable cost) and will as a result be used less.</p>
+<p>The first of these effects will be addressed as explained below by increasing the freeway lane-miles to reflect the effect of autonomous vehicle deployment on capacity. After the freeway lane-mile adjustment has been calculated the VMT model is run again to determine household DVMT. Freeway lane-miles is a factor with a positive coefficient in the model so the increase in capacity caused by autonomous vehicles results in additional DVMT.</p>
+<p>The second effect is accounted for by the &quot;AVTripVmtAdj&quot; parameter in the &quot;hh_veh_own_cost_parm.csv&quot; file. The factor needs to be asserted by the model user. Some studies like Chen and Kockelman <a href="#chen-2016b">(Chen 2016b)</a> may provide some guidance.</p>
+<p>The third effect is addressed by changing the effective auto accessibility of households that have available car services at lower marginal cost to be equal to the number of driving age persons.</p>
+<p>The fourth effect is also addressed by a factor (&quot;AVRepoVmtAdj&quot;) in the &quot;hh_veh_own_cost_parm.csv&quot; file. This factor needs to be asserted by the model user.</p>
+<p>The fifth effect is also addressed by a factor specified in the input file; the &quot;RepoProp&quot; factor in the &quot;car_svc_cost_parm.csv&quot; file. Several simulation studies have determined that the added VMT is about 10% of the VMT in revenue service. This factor is specified at a reference density (&quot;RefDensity&quot;). The proportion of non-revenue service increases as population density decreases. The model assumes that the proportion of non-revenue service chances in inverse proportion to the square root of population density (e.g. decreasing density 4 times doubles the proportion of non-revenue service).</p>
+<p>The sixth effect is modeled using the existing RSPM household budget model. Household-owned vehicle VMT using car services is multiplied by the cost per mile calculated as described above and the fuel/tire/maintenance cost. This is added to the household's variable costs (not ownership costs) for using the vehicles it owns. If the household's budget is exceeded, DVMT will be reduced. The adjustment in VMT is done in proportion to the before adjustment DVMT proportions.</p>
+<h4 id="modeling-congestion-effects">Modeling Congestion Effects</h4>
+<p>Autonomous vehicles are likely to reduce recurring congestion by increasing roadway capacity, and non-recurring congestion by reducing crashes.</p>
+<p>The effect of autonomous vehicles on capacity is modeled by adjusting freeway lane-miles. Fagnant and Kockelman report on the estimates by Shladover et al. that cooperative adaptive cruise control (CACC) deployed at the 10%, 50% and 90% levels would increase freeway lane capacities by 1%, 20%, and 80% respectively <a href="#fagnant-2015">(Fagnant 2015)</a>. CACC enables automated vehicles to travel in closely spaced platoons and would only be possible with level 4 automation. A simple polynomial model is fitted to these data to estimate capacity increases at different autonomous vehicle proportions of DVMT. Freeway lane-miles are increased at the rate of the predicted capacity increase. Arterial capacity is not adjusted because it is not at all certain how or if autonomous vehicles will increase capacity. An advantage of this approach is that it enables the capacity effect to be fed back into the calculation of VMT as described above.</p>
+<p>Changes in non-recurring congestion are calculated by adjusting the incident delay values in the congestion model. As reported by Fagnant and Kockelman, the FHWA estimates that about half of incident-related congestion is caused by crashes <a href="#fagnant-2015">(Fagnant 2015)</a>. The effects of reduced crashes due to vehicle automation can be addressed in the RSPM congestion by altering the 'OpsDelayReduce_$Incident' table in the GreenSTEP model object. For automated vehicle scenarios, the model table values for percentage reduction in freeway non-recurring congestion are overwritten with percentage reductions reflecting the level of crash reduction due to automation. For example, in the unlikely event that all crashes are eliminated, freeway non-recurring congestion delay would be reduced by 50%.</p>
+<h4 id="model-effects-on-fuel-consumption-and-emissions">Model Effects on Fuel Consumption and Emissions</h4>
+<p>The deployment of driverless cars is likely to significantly reduce the rates of fuel consumption (gallons per mile) and emissions (grams per mile) for a couple of reasons: 1. CACC will smooth traffic flows, reducing speed variation and accelerations and decelerations that waste fuel;, 2. SAVs will enable vehicle fleets to be smaller, more fuel efficient, and powered largely by electricity; and, 3. The fleet of SAVs will turn over more rapidly, enabling advanced technology to be incorporated more rapidly.</p>
+<p>The first of these effects can be modeled using the existing &quot;speed_smooth_ecodrive.csv&quot; file which enables users to specify the proportion of VMT that is affected by speed smoothing.</p>
+<p>The second factor is addressed by the &quot;EfficiencyIncrease&quot; factor in the &quot;car_svc_cost_parm.csv&quot; file. Base level vehicle efficiency is assumed to be the same as household vehicles of the same model year and power train type. The &quot;EfficiencyIncrease&quot; factor is used to to adjust the base levels. Burns makes some estimates of potential efficiency increase if car services deploy small vehicles sized to carry up to two passengers <a href="burns-2013">(Burns 2013)</a>.</p>
+<p>The third effect is addressed by using the &quot;SvcYears&quot; in the &quot;car_svc_cost_parm.csv&quot; file. This value determines the sequence of model year values used to calculate average fleet fuel efficiency, power efficiency, and proportion of vehicles powered by electricity. The &quot;car_svc_pt_prop.csv&quot; file is used to specify the power train splits.</p>
+<h3 id="references">References</h3>
+<p><a name="alba-2016"></a>Alba, Davey, The Lyft-GM Deal and Why You Probably Won't Buy a Self-Driving Car, Wired, 1 January 2016, http://www.wired.com/2016/01/the-lyft-gm-deal-and-why-you-probably-wont-buy-a-self-driving-car/.</p>
+<p><a name="aaa-2012"></a>American Automobile Association, Your Driving Costs (2012), http://exchange.aaa.com/wp-content/uploads/2012/04/Your-Driving-Costs-20122.pdf.</p>
+<p><a name="burns-2013"></a>Burns, Lawrence, William Jordan, and Bonnie Scarborough (2013) Transforming Personal Mobility. The Earth Institute – Columbia University. New York.</p>
+<p><a name="chen-2016a"></a>Chen, T. Donna, Kara Kockelman, and Josiah Hanna (2016), Operations of a Shared, Autonomous, Electric Vehicle Fleet: Implications of Vehicle &amp; Charging Infrastructure Decisions, Transportation Research Board Annual Meeting 2016 Paper #16-1840. http://www.caee.utexas.edu/prof/kockelman/public_html/TRB16SAEVs100mi.pdf</p>
+<p><a name="chen-2016b"></a>Chen, T. Donna and Kara Kockelman (2016), Management of a Shared, Autonomous, Electric Vehicle Fleet: Implications for Pricing Schemes, Forthcoming in Transportation Research Record (April 2016).</p>
+<p><a name="crothers-2015"></a>Crothers, Brooke (2015), Google Mulling Plan To Sell Self-Driving Cars, Offers Brief History Of Project, Forbes, 13 September 2015, http://www.forbes.com/sites/brookecrothers/2015/09/13/google-mulling-plan-to-sell-cars-offers-brief-history-of-its-autonomous-car-project/#75edb72e21ed.</p>
+<p><a name="davies-2015"></a>Davies, Alex (2015), Ford's Skipping the Trickiest Thing About Self-Driving Cars, Wired, 10 November 2015, https://www.wired.com/2015/11/ford-self-driving-car-plan-google/.</p>
+<p><a name="fagnant-2014"></a>Fagnant, Daniel and Kara Kockelman (2014), The Travel and Environmental Implications of Shared Autonomous Vehicles, Using Agent-Based Model Scenarios, Transportation Research Part C, Vol 40: 1-13.</p>
+<p><a name="fagnant-2015"></a>Fagnant, Daniel and Kara Kockelman (2015), Preparing a Nation for Autonomous Vehicles: Opportunities, Barriers and Policy Recommendations for Capitalizing on Self-Driven Vehicles, Transportation Research Part A 77: 167-181.</p>
+<p><a name="fagnant-2016"></a>Fagnant, Daniel and Kara Kockelman (2016), Dynamic Ride-Sharing and Fleet Sizing for a System of Shared Autonomous Vehicles in Austin Texas, Forthcoming in Transportation (April 2016). http://www.caee.utexas.edu/prof/kockelman/public_html/TRB15SAVswithDRSinAustin.pdf</p>
+<p><a name="gibbs-2016"></a>Gibbs, Samuel, Self-driving cars: who's building them and how do they work?, The Guardian, 26 May 2016, https://www.theguardian.com/technology/2016/may/26/self-driving-cars-whos-building-them-and-how-do-they-work.</p>
+<p><a name="google-2016a"></a>Google Self-Driving Car Project, Monthly Report, May 2016, https://static.googleusercontent.com/media/www.google.com/en//selfdrivingcar/files/reports/report-0516.pdf.</p>
+<p>&lt; name=&quot;google-2016b&quot;&gt;</a>Google, Google's Autonomous Vehicle, http://googlesautonomousvehicle.weebly.com/technology-and-costs.html, accessed 13 June 2016.</p>
+<p><a name="itf-2015"></a>International Transport Forum (2015), Urban Mobility System Upgrade: How Shared Self-Driving Cars Could Change City Traffic, OECD Corporate Partnership Report, May 2015.</p>
+<p><a name="levinson-2015"></a>Levinson, David (2015), Climbing Mount Next: The Effects of Autonomous Vehicles on Society, Minnesota Journal of Law, Science &amp; Technology, Vol. 16:2, 787-808.</p>
+<p><a name="litman-2015"></a>Litman, Todd (2015), Autonomous Vehicle Implementation Predictions: Implications for Transport Planning, Victoria Policy Institute, 10 December 2015, www.vtpi.org/avip.pdf.</p>
+<p><a name="nada-2013"></a>National Automobile Dealers Association (2013), NADA Used Vehicle Price Report: Age-level Analysis and Forecast, Q3 2013, https://www.nada.com/b2b/Portals/0/assets/pdf/Q3%20Whitepaper%20Age-level%20Analysis%20and%20Forecast.pdf.</p>
+<p><a name="nhtsa-2013"></a>National Highway Traffic Safety Administration, U.S. Department of Transportation Releases Policy on Automated Vehicle Development, May 30, 2013, http://www.nhtsa.gov/About+NHTSA/Press+Releases/U.S.+Department+of+Transportation+Releases+Policy+on+Automated+Vehicle+Development.</p>
+<p><a name="obrien-2016"></a>O'Brien, Sara Ashley (2016), Uber is Testing its First Self-Driving Car, CNN Money, 16 May 2016, http://money.cnn.com/2016/05/19/technology/uber-self-driving-cars/.</p>
+<p><a name="yadron-2016"></a>Danny Yadron (2016), Two years until self-driving cars are on the road – is Elon Musk right?, The Guardian, 2 June 2016, https://www.theguardian.com/technology/2016/jun/02/self-driving-car-elon-musk-tech-predictions-tesla-google.</p>
+</body>
+</html>
