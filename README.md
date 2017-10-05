@@ -16,6 +16,7 @@ The autonomous vehicle model is documented in the "RSPM_V3.6_AV-Model_Design.htm
 
 **Version 3.8 Changes**
 RSPM V3.8 includes changes to the code to handle lane-miles and transit revenue-miles. Lane-miles are input directly by model run year rather than having base year values that are scaled by growth factors. Transit revenue miles are handled the same way. Bus-equivalency factors are used to convert transit revenue miles by transit mode to bus-equivalent revenue miles. Following are model and input file changes:
+- model/lane_miles.csv - REMOVED
 - model/transit_revenue_miles.csv - REMOVED
 - model/revenue_mile_factors.csv - ADDED
 - scenario/inputs/lane_mile_growth.csv - REMOVED
