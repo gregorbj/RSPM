@@ -24,3 +24,6 @@ RSPM V3.8 includes changes to the code to handle lane-miles and transit revenue-
 - scenario/inputs/lane_miles.csv - ADDED
 - scenario/inputs/transit_growth.csv - REMOVED
 - scenario/inputs/transit_service.csv - ADDED
+
+**Version 3.8.1 Changes**
+Added capability for putting a VMT surcharge tax on EV travel. This is to enable policies for taxing the VMT of electric vehicle travel because those vehicles pay no gas taxes. The tax is entered in the 'EVVmtSurcharge' row of the 'costs.csv' input file. Units are dollars per vehicle-mile. The 'EVVmtSurcharge' is added to the 'VmtTax' to determine the total VMT tax for electric vehicle travel because the 'VmtTax' is applied to all vehicles.
