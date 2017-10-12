@@ -1,0 +1,11 @@
+Parameter,2005,2010,2038,2050,CostDataYear
+VehCost,20000,20000,20000,20000,2012
+AVTechCost,NA,NA,15000,1500,2012
+YearsFinanced,4,4,4,4,NA
+DepreciationRate,0.15,0.15,0.15,0.15,NA
+InterestRate,0.05,0.05,0.05,0.05,NA
+InsuranceCost,1000,1000,1000,1000,2012
+AVInsDiscProp,0.75,0.75,0.75,0.75,NA
+AVPkgDiscProp,0.5,0.5,0.5,0.5,NA
+AVTripVmtAdj,1,1,1,1,NA
+AVRepoVmtAdj,1,1,1,1,NA
