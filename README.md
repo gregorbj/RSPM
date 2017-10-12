@@ -9,7 +9,8 @@ RSPM V3.5 is documented in "GreenSTEP-RSPM_Documentation_20151220.docx" file. Do
 **Version 3.6 Changes**  
 This version includes new modules that model:  
 - Potential effects of autonomous vehicles and shared autonomous vehicles on auto ownership, use of car services, vehicle use costs, vehicle travel, and roadway capacity.
-- Revised cost and emissions models which account for autonomous vehicle use.  
+- Revised cost and emissions models which account for autonomous vehicle use.
+- DVMT and emissions of car-share travel now calculated.
 - Walking, bicycling, and public transit trip models - hurdle models that predict the number of trips as a function of household, land use, service characteristics, and household DVMT.
 - Automatic conversion of currency amounts between years - input files identify the data year; input values converted to model estimation year to run model; output values are converted to model base year.
 The autonomous vehicle model is documented in the "RSPM_V3.6_AV-Model_Design.html" and "RSPM_V3.6_AV-Model_Code&Testing.html" files. Documentation of the walk/bike/transit trip models is contained in the "RSPM_V3.6_Alt_Modes_Models.html" file.
