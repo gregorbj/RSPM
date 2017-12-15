@@ -7,7 +7,7 @@
 #http://www.apache.org/licenses/LICENSE-2.0
 #Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
 #Version: 3.8
-#Date: 8/14/16
+#Date: 12/14/16
 
 #Description
 #===========
@@ -217,12 +217,13 @@ for( yr in RunYears ) {
   #Set random seed for model run
   set.seed( RandomSeedValue )
   
+
   #================================================================================
   #STEP 2: SIMULATE HOUSEHOLD TRAVEL CHARACTERISTICS FOR EACH METROPOLITAN DIVISION 
   #================================================================================
   
   StartTime <- Sys.time()
-  print( "Simulation of household travel characteristics" )
+  print( "Simulation of inital household travel characteristics" )
   
   # Iterate through metropolitan divisions
   #=======================================
@@ -244,7 +245,7 @@ for( yr in RunYears ) {
     # Identify group quarters households
     IsGroupPop. <- SynPop..$HouseType == "GQ"
     
-    #Step : Add the freeway and transit supply data to the SynPop..
+    #Step 2a: Add the freeway and transit supply data to the SynPop..
     #================================================================
     
     SynPop..$Fwylnmicap <- 0
@@ -252,7 +253,7 @@ for( yr in RunYears ) {
     SynPop..$Tranmilescap <- 0
     SynPop..$Tranmilescap <- TranRevMiCap.Yr[ yr ]
     
-    #Step : Identify households affected by travel demand management or vehicle o&m programs
+    #Step 2b: Identify households affected by travel demand management or vehicle o&m programs
     #=========================================================================================
     
     # Identify ECO and IMP households
@@ -296,7 +297,7 @@ for( yr in RunYears ) {
                                              EcoTire..Yr[ yr, "LowRollProp" ] )
     rm( ModelVar., TempInputData.. )
     
-    #Step 2b: Calculate vehicle ownership
+    #Step 2c: Calculate vehicle ownership
     #====================================
     
     # Calculate initial vehicle ownership
@@ -332,7 +333,7 @@ for( yr in RunYears ) {
     if( exists( "MetroVehOwn_" ) ) rm( MetroVehOwn_ )
     if( exists( "GroupVeh." ) ) rm( GroupVeh. )
 
-    #Step 2c: 1st DVMT calculation
+    #Step 2d: 1st DVMT calculation
     #=============================
 
     SynPop..$BaseCostPerMi <- 4 / 100
@@ -347,55 +348,11 @@ for( yr in RunYears ) {
       predictAveDvmt(SynPop..[, ModelVar.], DvmtLmModels_, "Metro")$DvmtAve
     rm(ModelVar.)
 
-    #Step 2d: Apply parking model to identify parkers and calculate daily parking costs
-    #==================================================================================
-    
-    # Calculate parking costs for households that live in metropolitan areas
-    SynPop..$DailyPkgCost <- 0
-    SynPop..$CashOutIncAdj <- 0
-    ModelVar. <- c( "DrvAgePop", "Houseid", "Dvmt", "Hhvehcnt" ) 
-    Parkers_ <- idPayingParkers( SynPop..[ , ModelVar. ],
-                                 PropWrkPkg=PkgParm_Va..$PropWrkPkg[ md, yr ],
-                                 PropWrkChrgd=PkgParm_Va..$PropWrkChrgd[ md, yr ],
-                                 PropCashOut=PkgParm_Va..$PropCashOut[ md, yr ],
-                                 PropOthChrgd=PkgParm_Va..$PropOthChrgd[ md, yr ],
-                                 PkgCost=PkgParm_Va..$PkgCost[ md, yr ],
-                                 PropWrkTrav=0.22, WrkDaysPerYear=260 )
-    PkgCosts_ <- calcParkCostAdj( SynPop..[ , ModelVar. ], Parkers_ )
-    SynPop..$DailyPkgCost <- PkgCosts_$DailyPkgCost
-    SynPop..$CashOutIncAdj <- PkgCosts_$CashOutIncAdj
-    rm( Parkers_, PkgCosts_, ModelVar. )
-    gc()
-
-    #Step 2e: Calculate car service use, adjust vehicle ownership and VMT
-    #====================================================================
-    
-    SynPop..$CarSvcAvail <- 
-      calcCarSvcAvail(SynPop.., CarSvcAvail.DiYr[,yr])
-    ModelVar. <- c(
-      "Hhincttl", "Hbppopdn", "Hhvehcnt", "Tranmilescap", "Fwylnmicap", 
-      "DrvAgePop", "Hhsize", "Age0to14", "Age15to19", "Age20to29", "Age30to54", 
-      "Age55to64", "Age65Plus", "Urban", "DailyPkgCost", "CarSvcAvail"
-      )
-    VehUse_ <- 
-      calcVehicleUse(SynPop..[, ModelVar.],
-                     HhVehOwnParm_ = as.list(t(HhVehOwnParm..)[yr,]),
-                     CarSvcCostParm_ = as.list(t(CarSvcCostParm..)[yr,]))
-    SynPop..$Dvmt <- VehUse_$HhAuDvmt + VehUse_$HhNAuDvmt
-    SynPop..$AuDvmt <- VehUse_$HhAuDvmt
-    SynPop..$NAuDvmt <- VehUse_$HhNAuDvmt
-    SynPop..$CarSvcDvmt <- VehUse_$CarSvcDvmt
-    SynPop..$Hhvehcnt <- VehUse_$NumAuVeh + VehUse_$NumNAuVeh
-    SynPop..$NumAuVeh <- VehUse_$NumAuVeh
-    SynPop..$NumNAuVeh <- VehUse_$NumNAuVeh
-    SynPop..$CarSvcBaseCost <- VehUse_$CarSvcMileCost
-    SynPop..$CarSvcRepoProp <- VehUse_$RepoProp
-    CarSvcIsAV <- VehUse_$CarSvcIsAV
-
-    rm(ModelVar., VehUse_)
-
-    #Step 2f: Calculate non-price TDM and light-weight vehicle DVMT adjustment factors
+    #Step 2e: Calculate non-price TDM and light-weight vehicle DVMT adjustment factors
     #=================================================================================
+    #This step occurs before the autonomous vehicle model so that the reductions 
+    #apply to all vehicle travel by households, not just to vehicle travel 
+    #using household vehicles.
     
     # Calculate the TDM adjustment factor
     #------------------------------------
@@ -463,32 +420,187 @@ for( yr in RunYears ) {
         TdmAdjDvmt.Hh )
     SynPop..$LogSize <- NULL
     SynPop..$LogDvmt <- NULL
+   
+
+    #Step 2f: Apply parking model to identify parkers and calculate daily parking costs
+    #==================================================================================
+    #This has to be done before the autonomous vehicle model is applied because
+    #parking costs affect the economics of owning an autonomous vehicle or using
+    #a shared autonomous vehicle service.
     
-    #Step 2g: Calculate the 95th percentile and maximum DVMT from the adjusted DVMT
-    #==============================================================================
+    # Calculate parking costs for households that live in metropolitan areas
+    SynPop..$DailyPkgCost <- 0
+    SynPop..$CashOutIncAdj <- 0
+    ModelVar. <- c( "DrvAgePop", "Houseid", "Dvmt", "Hhvehcnt" ) 
+    Parkers_ <- idPayingParkers( SynPop..[ , ModelVar. ],
+                                 PropWrkPkg=PkgParm_Va..$PropWrkPkg[ md, yr ],
+                                 PropWrkChrgd=PkgParm_Va..$PropWrkChrgd[ md, yr ],
+                                 PropCashOut=PkgParm_Va..$PropCashOut[ md, yr ],
+                                 PropOthChrgd=PkgParm_Va..$PropOthChrgd[ md, yr ],
+                                 PkgCost=PkgParm_Va..$PkgCost[ md, yr ],
+                                 PropWrkTrav=0.22, WrkDaysPerYear=260 )
+    PkgCosts_ <- calcParkCostAdj( SynPop..[ , ModelVar. ], Parkers_ )
+    SynPop..$DailyPkgCost <- PkgCosts_$DailyPkgCost
+    SynPop..$CashOutIncAdj <- PkgCosts_$CashOutIncAdj
+    rm( Parkers_, PkgCosts_, ModelVar. )
+    gc()
+
+    # Save results
+    #-------------			
+    Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
+    save( SynPop.., file=Filename, compress=TRUE )
+    rm( SynPop.. )
+    gc()
     
+    # End loop through divisions
+    gc()
+  }
+  print( StartTime )
+  print( Sys.time() )
+  
+
+  #====================================================================
+  #STEP 3: CALCULATE THE EFFECTS OF CAR SERVICES AND AUTOMATED VEHICLES 
+  #====================================================================
+  #The car-service and automated vehicles model adjusts household vehicle
+  #ownership based on the availability and cost of using car services relative
+  #to the marginal cost savings of owning fewer vehicles. The model also 
+  #determines which households would own automated vehicles. The model is run
+  #in two iterations. The first iteration is used to determine the proportion
+  #of DVMT that is traveled in automated vehicles. This is used to adjust
+  #freeway lane-miles to account for the effect of automated vehicles on
+  #freeway capacity. The second iteration uses the adjusted freeway lane-miles
+  #to calculate final DVMT numbers to account for the effect of increased
+  #capacity on the amount of travel.
+  
+  StartTime <- Sys.time()
+  print( "Simulation of car service and automated vehicle use" )
+  
+  TotDvmt <- 0
+  AuDvmt <- 0
+
+  #Step 3a: Calculating the Autonomous Vehicle DVMT Proportion
+  #===========================================================
+
+  print( "Calculate freeway lane-mile multiplier" )
+
+  #Iterate through divisions to calculate autonomous vehicle use  
+  for( md in Md ) {
+    
+    print( md )
+    
+    # Load metropolitan division file
+    Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
+    SynPop.. <- assignLoad( Filename )
+    
+    # Assign block group density variable to accommodate new model
+    SynPop..$Hbppopdn <- SynPop..$Htppopdn
+    
+    #Calculate car service availabilty
+    SynPop..$CarSvcAvail <- 
+      calcCarSvcAvail(SynPop.., CarSvcAvail.DiYr[,yr])
+    
+    #Identify SynPop.. data items needed
+    ModelVar. <- c(
+      "Hhincttl", "Hbppopdn", "Hhvehcnt", "Tranmilescap", "Fwylnmicap", 
+      "DrvAgePop", "Hhsize", "Age0to14", "Age15to19", "Age20to29", "Age30to54", 
+      "Age55to64", "Age65Plus", "Urban", "DailyPkgCost", "CarSvcAvail"
+      )
+
+    #Run model first time to calculate adjustments to freeway lane-miles to
+    #account for capacity effects of autonomous vehicles
+    VehUse_ <- 
+      calcVehicleUse(SynPop..[, ModelVar.],
+                     HhVehOwnParm_ = as.list(t(HhVehOwnParm..)[yr,]),
+                     CarSvcCostParm_ = as.list(t(CarSvcCostParm..)[yr,]))
+    
+    #Tabulate total DVMT
+    TotDvmt <- 
+      TotDvmt + sum(
+        VehUse_$HhAuDvmt + VehUse_$HhNAuDvmt + VehUse_$CarSvcDvmt *
+        (1 + VehUse_$RepoProp), na.rm = TRUE
+      )
+      
+    #Tabulate autonomous vehicle DVMT
+    AuDvmt <- 
+      AuDvmt + sum(
+        VehUse_$HhAuDvmt + VehUse_$CarSvcDvmt * VehUse_$CarSvcIsAV *
+          (1 + VehUse_$RepoProp), na.rm = TRUE 
+      )
+    
+    #Clean up
+    rm(SynPop.., ModelVar., VehUse_)
+
+  # End loop through divisions
+  }
+  
+  #Calculate freeway lane-mile expansion factor
+  PropAuDvmt <- AuDvmt / TotDvmt
+  FwyLnMiMult <- calcFwyLnMiMult(PropAuDvmt)
+  rm(AuDvmt, TotDvmt)
+  
+  #Step 3b: Split DVMT into household vehicle, car service, and autonomous
+  #==========================================================================
+  
+  print( "Split DVMT into household vehicle, car service, and autonomous" )
+
+  #Iterate through divisions to calculate autonomous vehicle use  
+  for( md in Md ) {
+    
+    print( md )
+    
+    # Load metropolitan division file
+    Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
+    SynPop.. <- assignLoad( Filename )
+    
+    # Assign block group density variable to accommodate new model
+    SynPop..$Hbppopdn <- SynPop..$Htppopdn
+    
+    #Calculate car service availabilty
+    SynPop..$CarSvcAvail <- 
+      calcCarSvcAvail(SynPop.., CarSvcAvail.DiYr[,yr])
+    
+    #Identify SynPop.. data items needed
+    ModelVar. <- c(
+      "Hhincttl", "Hbppopdn", "Hhvehcnt", "Tranmilescap", "Fwylnmicap", 
+      "DrvAgePop", "Hhsize", "Age0to14", "Age15to19", "Age20to29", "Age30to54", 
+      "Age55to64", "Age65Plus", "Urban", "DailyPkgCost", "CarSvcAvail"
+    )
+    
+    #Factor up freeway lane miles to account for effect of autonomous vehicles
+    #on capacity
+    SynPop..$Fwylnmicap <- SynPop..$Fwylnmicap * FwyLnMiMult
+    
+    #Apply the car service and autonomous vehicle model
+    VehUse_ <- 
+      calcVehicleUse(SynPop..[, ModelVar.],
+                     HhVehOwnParm_ = as.list(t(HhVehOwnParm..)[yr,]),
+                     CarSvcCostParm_ = as.list(t(CarSvcCostParm..)[yr,]))
+    
+    #Assign the results to the household dataset
+    SynPop..$Dvmt <- VehUse_$HhAuDvmt + VehUse_$HhNAuDvmt
+    SynPop..$AuDvmt <- VehUse_$HhAuDvmt
+    SynPop..$NAuDvmt <- VehUse_$HhNAuDvmt
+    SynPop..$CarSvcDvmt <- VehUse_$CarSvcDvmt
+    SynPop..$Hhvehcnt <- VehUse_$NumAuVeh + VehUse_$NumNAuVeh
+    SynPop..$NumAuVeh <- VehUse_$NumAuVeh
+    SynPop..$NumNAuVeh <- VehUse_$NumNAuVeh
+    SynPop..$CarSvcBaseCost <- VehUse_$CarSvcMileCost
+    SynPop..$CarSvcRepoProp <- VehUse_$RepoProp
+    SynPop..$CarSvcIsAV <- VehUse_$CarSvcIsAV
+    SynPop..$OrigNumVeh <- VehUse_$OrigNumVeh
+
+    #Calculate the 95th percentile and maximum DVMT from the adjusted DVMT
     SynPop..$MaxDvmt <- 0
     SynPop..$Dvmt95 <- 0
     MetroMax95th_ <- predictMaxDvmt( SynPop..[ , c( "Dvmt", "MaxDvmt", "Dvmt95" ) ],
                                        DvmtLmModels_, "Metro" )
     SynPop..$MaxDvmt <- MetroMax95th_$DvmtMax
     SynPop..$Dvmt95 <- MetroMax95th_$Dvmt95th
-    rm(MetroMax95th_)
-    gc()
     
-    #Step 2h: Calculate Walk, Bike, & Transit Trips
-    #==============================================
-    # These are performance measures. They do not affect DVMT calculations.
-    ModelVar. <- 
-      c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", 
-        "Age65Plus", "Hhsize", "Hhincttl", "Hbppopdn", "Tranmilescap",
-        "Urban", "Dvmt", "Hhvehcnt") 
-    AltModeTrips_ <- 
-      calcAltModeTrips(SynPop..[,ModelVar.], AltModeModels_, "Metro")
-    SynPop..$AveWalkTrips <- AltModeTrips_$Walk
-    SynPop..$AveBikeTrips <- AltModeTrips_$Bike
-    SynPop..$AveTransitTrips <- AltModeTrips_$Transit
-    rm(ModelVar., AltModeTrips_)
+    #Clean up
+    rm(ModelVar., VehUse_, MetroMax95th_)
+    gc()
     
     # Remove variables from SynPop.. not needed
     #------------------------------------------
@@ -503,13 +615,22 @@ for( yr in RunYears ) {
     
     # End loop through divisions
     gc()
+    
   }
+  
+  #Save the autonomous vehicle DVMT proportion and freeway lane-mile multiplier
+  Filename <- paste( RunYearDir, "/", "PropAuDvmt", ".RData", sep="" )
+  save( PropAuDvmt, file=Filename )
+  Filename <- paste( RunYearDir, "/", "FwyLnMiMult", ".RData", sep="" )
+  save( FwyLnMiMult, file=Filename )
+  rm( PropAuDvmt, FwyLnMiMult, Filename )
+  
   print( StartTime )
   print( Sys.time() )
   
-  
+
   #==================================================
-  #STEP 3: SIMULATE HOUSEHOLD VEHICLE CHARACTERISTICS
+  #STEP 4: SIMULATE HOUSEHOLD VEHICLE CHARACTERISTICS
   #==================================================
   
   StartTime <- Sys.time()
@@ -526,7 +647,7 @@ for( yr in RunYears ) {
     Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
     SynPop.. <- assignLoad( Filename )
     
-    #Step 3a: Calculate vehicle types, ages, initial fuel economy, and assign vehicle DVMT
+    #Step 4a: Calculate vehicle types, ages, initial fuel economy, and assign vehicle DVMT
     #=====================================================================================
     
     # Predict light truck ownership and vehicle ages
@@ -570,7 +691,7 @@ for( yr in RunYears ) {
     SynPop..$VehDvmt <- calcVehDvmt( SynPop..$Dvmt, SynPop..$DvmtProp )
     gc()
     
-    #Step 3b: Identify HEVs & PHEVs
+    #Step 4b: Identify HEVs & PHEVs
     #==============================
     
     # Apply HEV/PHEV model
@@ -602,7 +723,7 @@ for( yr in RunYears ) {
     rm( PhevResults_, HasVeh.Hh )
     gc()
     
-    #Step 3c: Identify EVs
+    #Step 4c: Identify EVs
     #=====================
     
     # Apply EV model	
@@ -619,8 +740,8 @@ for( yr in RunYears ) {
     SynPop..$Powertrain[ HasVeh.Hh & HasDvmt.Hh ] <- EvResults_$Powertrain_
     rm( EvResults_, HasVeh.Hh, HasDvmt.Hh, ModelVar. )
     
-    #Calculate vehicle depreciation expenses
-    #=======================================
+    #Step 4d: Calculate vehicle depreciation expenses
+    #================================================
     
     SynPop..$DepExp <- 0
     HasVeh.Hh <- SynPop..$Hhvehcnt >= 1
@@ -629,8 +750,8 @@ for( yr in RunYears ) {
     rm( HasVeh.Hh, ModelVar. )
     gc()
     
-    #Assign PAYD Insurance
-    #=====================
+    #Step 4e: Assign PAYD Insurance
+    #==============================
     
     ModelVar. <- c( "Houseid", "Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", 
                     "Age65Plus", "Dvmt", "Hhvehcnt", "Hhincttl", "VehType", "VehAge" )
@@ -654,204 +775,575 @@ for( yr in RunYears ) {
   
   
   #=====================================================
-  #STEP 4: EQUILIBRATE DVMT, COSTS, REVENUES, CONGESTION 
+  #STEP 5: EQUILIBRATE DVMT, COSTS, REVENUES, CONGESTION 
   #=====================================================
   
   # Loop to equilibrate DVMT, travel costs, revenues and congestion
   #----------------------------------------------------------------
   
-    #Create list to store DVMT, cost totals
-    Pop.MdDt <- apply( Pop.MdDtYr, c(1,2), sum )
-    Dvmt.MdDt <- Pop.MdDt * 0
-    AuDvmt.MdDt <- Pop.MdDt * 0
-    Va <- c( "Dvmt", "AdjDvmt", "CongPrice", "FuelCost", "PowerCost", "RoadUseTax", "CarbonTax", "AddedExtTax", 
-             "PaydCost", "TotExtCost", "HhTotCost", "FutrCostPerMi", "VehOwnExp", "TotRoadCost" )
-    CostSummary.MdVa <- array( 0, dim=c( length(Md), length(Va) ), dimnames=list(Md,Va) )
-    AveCongTaxPerMi <- 0
-    ExtraModCost <- 0
+  #Create list to store DVMT, cost totals
+  Pop.MdDt <- apply( Pop.MdDtYr, c(1,2), sum )
+  Dvmt.MdDt <- Pop.MdDt * 0
+  AuDvmt.MdDt <- Pop.MdDt * 0
+  Va <- c( "Dvmt", "AdjDvmt", "CongPrice", "FuelCost", "PowerCost", 
+           "RoadUseTax", "CarbonTax", "AddedExtTax", "PaydCost", "TotExtCost", 
+           "HhTotCost", "FutrCostPerMi", "VehOwnExp", "TotRoadCost" )
+  CostSummary.MdVa <- 
+    array( 0, dim=c( length(Md), length(Va) ), dimnames=list(Md,Va) )
+  AveCongTaxPerMi <- 0
+  ExtraModCost <- 0
+  
+  # Run 4 iterations if VMT tax surcharge is calculated, otherwise run 2 iterations.
+  if( CalcVmtSurcharge ) {
+    It <- 1:4
+  } else {
+    It <- 1:2
+  }
+  VmtSurcharge.It <- numeric( length(It) )
+  rm( Va ) 
+  
+  for( it in It ) {
     
-    # Run 4 iterations if VMT tax surcharge is calculated, otherwise run 2 iterations.
-    if( CalcVmtSurcharge ) {
-      It <- 1:4
-    } else {
-      It <- 1:2
+    StartTime <- Sys.time()
+    print( paste( "Iteration", it, "Calculate emissions and cost and adjust DVMT" ) )
+    
+    #Steps 5a & 5b: calculate energy consumption, CO2e, production, household costs, and adjust DVMT from costs
+    #==========================================================================================================
+    for( md in Md ) {
+      
+      print( md )
+      
+      # Identify the districts in the metropolitan division
+      Dx <- Di[ Di %in% rownames( DistrictGroups.. )[ DistrictGroups..$Division == md ] ]
+      
+      # Load division file
+      Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )  
+      SynPop.. <- assignLoad( Filename )
+      
+      #Step 4a: Calculate fuel & electricity consumption, CO2e production, & household costs
+      #=====================================================================================
+      
+      #Calculate household vehicle fuel & electricity consumption and CO2e production
+      #------------------------------------------------------------------------------
+      #Calculate consumption and production at a household level
+      ModelVar. <- c( "Hhvehcnt", "HcVehDvmt", "VehMpg", "VehType", "EvVehDvmt",
+                      "VehMpkwh", "Dvmt" )
+      for( dx in Dx ) {
+        IsDistrict. <- SynPop..$District == dx 
+        if (sum(IsDistrict. > 0)) {
+          FuelElecCo2e_ <- calcVehFuelElecCo2( SynPop..[ IsDistrict., ModelVar. ], AveFuelCo2e.=AveFuelCo2e.LdYr[,yr],
+                                               AveElectricCo2e=AveElectricCo2e.DiYr[dx,yr] )
+          SynPop..$FuelGallons[ IsDistrict. ] <- FuelElecCo2e_$FuelGallons
+          SynPop..$FuelCo2e[ IsDistrict. ] <- FuelElecCo2e_$FuelCo2e
+          SynPop..$ElecKwh[ IsDistrict. ] <- FuelElecCo2e_$ElecKwh
+          SynPop..$ElecCo2e[ IsDistrict. ] <- FuelElecCo2e_$ElecCo2e
+          rm( FuelElecCo2e_ )
+        }
+      }
+      rm( ModelVar. )
+      gc()
+      
+      #Calculate car service vehicle fuel & electricity consumption and CO2e production
+      #--------------------------------------------------------------------------------
+      #Calculate average MPG, MPkWh, fuel CO2e, & power CO2e
+      CarSvcFuelElecCo2Rate_ <- 
+        calcCarSvcFuelElecCo2Rates( Year = yr, 
+                                    CarSvcCostParm.. = CarSvcCostParm.., 
+                                    CarSvcLtTruckProp.Yr = CarSvcLtTruckProp.Yr, 
+                                    CarSvcPtProp..Yr = CarSvcPtProp..Yr,
+                                    AutoLtTrkMpg..Yr = AutoLtTrkMpg..Yr, 
+                                    EvRangeProp..Yr = EvRangeProp..Yr, 
+                                    HevMpgProp..Yr = HevMpgProp..Yr,
+                                    FuelCo2..Yr = FuelCo2..Yr, 
+                                    PowerCo2.DiYr = PowerCo2.DiYr)
+      #Calculate amounts of fuel and power consumed, and CO2e produced
+      CarSvcFuelElecCo2_ <- calcCarSvcFuelElecCo2()
+      SynPop..$CarSvcFuelGal <- CarSvcFuelElecCo2_$CarSvcFuelGal
+      SynPop..$CarSvcElecKwh <- CarSvcFuelElecCo2_$CarSvcElecKwh
+      SynPop..$CarSvcFuelCo2e <- CarSvcFuelElecCo2_$CarSvcFuelCo2e
+      SynPop..$CarSvcElecCo2e <- CarSvcFuelElecCo2_$CarSvcElecCo2e
+      #Save the car service emissions calculations
+      Filename <- 
+        paste( RunYearDir, "/", "CarSvcFuelElecCo2Rate_", ".RData", sep="" )
+      save( CarSvcFuelElecCo2Rate_, file=Filename, compress=TRUE )
+      #Clean up
+      rm(CarSvcFuelElecCo2Rate_, CarSvcFuelElecCo2_)
+      
+      #Calculate household costs
+      #-------------------------
+      # Identify congestion price for metropolitan area if any
+      CongPrice <- AveCongTaxPerMi
+      # Identify the VmtSurcharge calculated to balance costs and revenues
+      if( it == 1 ) {
+        VmtSurcharge <- 0
+      } else {
+        VmtSurcharge <- VmtSurcharge.It[ it - 1 ]   # VmtSurcharge is value calculated in previous iteration
+      }
+      # Run household travel cost model  
+      ModelVar. <- 
+        c( "Dvmt", "FuelGallons", "FuelCo2e", "ElecCo2e", "ElecKwh", "DevType", 
+           "Payd", "DailyPkgCost", "Hhvehcnt", "DepExp", "Hhincttl",
+           "CarSvcFuelGal", "CarSvcFuelCo2e", "CarSvcElecCo2e", "CarSvcElecKwh",
+           "CarSvcDvmt", "CarSvcBaseCost")
+      Costs_ <- calcCosts( Data..=SynPop..[ , ModelVar. ], 
+                           Costs.=Costs.YrCs[ yr, ], 
+                           PaydRate=Payd..Yr[ "RatePerMile", yr ],
+                           CongPrice=CongPrice,
+                           VmtSurcharge=VmtSurcharge, 
+                           ExtraModCost=ExtraModCost,
+                           AVPkgDiscProp=HhVehOwnParm..["AVPkgDiscProp",yr] )
+      rm( VmtSurcharge )	
+      # Add selected cost data to household records
+      SynPop..$FutrCostPerMi <- Costs_$FutrCostPerMi
+      SynPop..$TotExtCost <- Costs_$TotExtCost
+      SynPop..$HhTotCost <- Costs_$HhTotCost
+      SynPop..$VehOwnExp <- Costs_$VehOwnExp
+      
+      # Add sums to DVMT and cost summary
+      Dvmt.MdDt[ md, Dt] <- 
+        tapply( SynPop..$Dvmt + 
+                  SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
+                SynPop..$DevType, sum, na.rm=TRUE )[Dt]
+      Dvmt.MdDt[ is.na( Dvmt.MdDt ) ] <- 0
+      CostSummary.MdVa[ md, "Dvmt" ] <- sum( Dvmt.MdDt[md,] )
+      CostSummary.MdVa[ md, "FuelCost" ] <- sum( Costs_$FuelCost )  
+      CostSummary.MdVa[ md, "PowerCost" ] <- sum( Costs_$PowerCost ) 
+      CostSummary.MdVa[ md, "RoadUseTax" ] <- sum( Costs_$RoadUseTax )
+      CostSummary.MdVa[ md, "CarbonTax" ] <- sum( Costs_$CarbonTax )
+      CostSummary.MdVa[ md, "AddedExtTax" ] <- sum( Costs_$AddedExtTax )
+      CostSummary.MdVa[ md, "PaydCost" ] <- sum( Costs_$PaydCost )
+      CostSummary.MdVa[ md, "TotExtCost" ] <- sum( Costs_$TotExtCost )
+      CostSummary.MdVa[ md, "HhTotCost" ] <- sum( Costs_$HhTotCost )
+      CostSummary.MdVa[ md, "FutrCostPerMi" ] <- sum(Costs_$HhTotCost) / sum(Dvmt.MdDt[md,])
+      CostSummary.MdVa[ md, "VehOwnExp" ] <- sum( Costs_$VehOwnExp )
+      CostSummary.MdVa[ md, "TotRoadCost" ] <- sum( Costs_$TotRoadCost )
+      rm( Costs_, ModelVar. )
+      gc()
+      
+      #Step 5b: Calculate DVMT with new costs and reallocate to vehicles
+      #=================================================================
+      
+      #Calculate household DVMT prior to adjustment
+      #--------------------------------------------
+      #Household DVMT using household vehicles is saved to use in calculating
+      #ratio for adjusting DVMT for each household vehicle
+      PrevDvmt.Hh <- SynPop..$Dvmt
+      
+      #Recalculate DVMT considering cost and household budget
+      #------------------------------------------------------
+      #Calculate adjustments to all components of household DVMT as a result
+      #of household budget limitations. Note that calculation of adjustment
+      #incorporates light-weight vehicle adjustment that was previously done
+      #separately.
+      ModelVar. <- c( "Dvmt", "CarSvcDvmt", "AuDvmt", "NAuDvmt", 
+                      "BaseCostPerMi", "FutrCostPerMi", "LtVehAdjFactor",
+                      "TdmLtVehAdjFactor", "Hhincttl", "CashOutIncAdj")
+      Bgt_ <- 
+        calcAdjAveDvmt( SynPop..[ , ModelVar. ], BudgetProp=BudgetProp, 
+                        AnnVmtInflator=AnnVmtInflator, TrnstnProp=1 )
+      SynPop..$Dvmt <- Bgt_$HhDvmt
+      SynPop..$AuDvmt <- Bgt_$AuDvmt
+      SynPop..$NAuDvmt <- Bgt_$NAuDvmt
+      SynPop..$CarSvcDvmt <- Bgt_$CarSvcDvmt
+      SynPop..$LtVehDvmt <- Bgt_$LtVehDvmt
+      
+      #Calculate 95th percentile and maximum DVMT for household vehicles
+      #-----------------------------------------------------------------
+      SynPop..$MaxDvmt <- 0
+      SynPop..$Dvmt95 <- 0
+      MetroMax95th_ <- 
+        predictMaxDvmt( SynPop..[ , c( "Dvmt", "MaxDvmt", "Dvmt95" ) ], DvmtLmModels_, "Metro" )
+      SynPop..$MaxDvmt <- MetroMax95th_$DvmtMax
+      SynPop..$Dvmt95 <- MetroMax95th_$Dvmt95th
+      rm( MetroMax95th_ )
+      gc()
+      
+      #Split adjusted household vehicle DVMT among household vehicles
+      #---------------------------------------------------------------
+      #Calculate ratio of adjusted household vehicle DVMT to unadjusted
+      #household vehicle VMT
+      DvmtAdjFactor.Hh <- SynPop..$Dvmt / PrevDvmt.Hh
+      
+      #Adjust the DVMT allocated to each household vehicle proportional to
+      #the overall adjustment of household vehicle DVMT
+      HasVeh.Hh <- SynPop..$Hhvehcnt >= 1
+      ModelVar. <- c( "VehDvmt", "HcVehDvmt", "EvVehDvmt" )
+      AdjDvmt_ <- 
+        allocateAdjDvmt( SynPop..[ HasVeh.Hh, ModelVar. ],
+                         DvmtAdjFactor.Hh[ HasVeh.Hh ] )
+      SynPop..$VehDvmt[ HasVeh.Hh ] <- AdjDvmt_$VehDvmt
+      SynPop..$EvVehDvmt[ HasVeh.Hh ] <- AdjDvmt_$EvVehDvmt
+      SynPop..$HcVehDvmt[ HasVeh.Hh ] <- AdjDvmt_$HcVehDvmt
+      rm( DvmtAdjFactor.Hh, HasVeh.Hh, ModelVar., AdjDvmt_ )
+      gc()
+      
+      # Tabulate DVMT to use in congestion analysis
+      #--------------------------------------------
+      Dvmt.MdDt[md,Dt] <- 
+        tapply( SynPop..$Dvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
+                SynPop..$DevType, sum, na.rm=TRUE )[Dt]
+      Dvmt.MdDt[ is.na( Dvmt.MdDt ) ] <- 0
+      CostSummary.MdVa[ md, "AdjDvmt" ] <- sum( SynPop..$Dvmt, na.rm=TRUE )
+      
+      #Tabulate autonomous vehicle VMT
+      #-------------------------------
+      AuDvmt.MdDt[md,Dt] <- 
+        tapply( SynPop..$AuDvmt + SynPop..$CarSvcDvmt * CarSvcIsAV, 
+                SynPop..$DevType, sum, na.rm=TRUE )[Dt]        
+      AuDvmt.MdDt[ is.na( AuDvmt.MdDt ) ] <- 0  
+      
+      # Save the household dataset
+      #---------------------------
+      Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
+      save( SynPop.., file=Filename, compress=TRUE )
+      rm( SynPop.. )
+      gc()
+      gc()
+      print( memory.size() )
+      
+      # End iteration through metropolitan divisions
     }
-    VmtSurcharge.It <- numeric( length(It) )
-    rm( Va ) 
     
-    for( it in It ) {
+    #Save the tabulations of Dvmt and Costs
+    #---------------------------------------
+    Filename <- paste( RunYearDir, "/", "Dvmt.MdDt", ".RData", sep="" )
+    save( Dvmt.MdDt, file=Filename )
+    rm( Filename )
+    Filename <- paste( RunYearDir, "/", "AuDvmt.MdDt", ".RData", sep="" )
+    save( AuDvmt.MdDt, file=Filename )
+    rm( Filename )
+    Filename <- paste( RunYearDir, "/", "CostSummary.MdVa", ".RData", sep="" )
+    save( CostSummary.MdVa, file=Filename )
+    rm( Filename )
+    print( StartTime )
+    print( Sys.time() )
+    
+    #Step 5c: Calculate Effects of Congestion
+    #========================================
+    
+    local( {
+      
+      #Load data summaries
+      #--------------------
+      #Load income
+      Filename <- paste( OutputDir, "/Inc.DtYr.RData", sep="" )
+      Inc.DtYr <- assignLoad( Filename )
+      #Load population
+      Filename <- paste( OutputDir, "/Pop.DtYr.RData", sep="" )
+      Pop.DtYr <- assignLoad( Filename )
+      #Calculate population change from base year
+      PopChangeRatio.Dt <- Pop.DtYr[ , yr ] / Pop.DtYr[ , BaseYear ]
+      PopChangeRatio.Dt[ is.na( PopChangeRatio.Dt ) ] <- 0
+      #Load metropolitan transportation summaries
+      Filename <- paste( OutputDir, "/FwyLnMiCap.Yr.RData", sep="" )        
+      FwyLnMiCap.Yr <- assignLoad( Filename )
+      Filename <- paste( OutputDir, "/ArtLnMiCap.Yr.RData", sep="" )
+      ArtLnMiCap.Yr <- assignLoad( Filename )
+      Filename <- paste( OutputDir, "/TranRevMiCap.Yr.RData", sep="" )
+      TranRevMiCap.Yr <- assignLoad( Filename )
+      Filename <- paste( OutputDir, "/BusRevMi.Yr.RData", sep="" )
+      BusRevMi.Yr <- assignLoad( Filename )
+      Filename <- paste( OutputDir, "/RailRevMi.Yr.RData", sep="" )
+      RailRevMi.Yr <- assignLoad( Filename )
+      rm( Filename )
+      Filename <- paste( RunYearDir, "/", "FwyLnMiMult", ".RData", sep="" )
+      FwyLnMiMult <- assignLoad(Filename)
+      rm(Filename)
+      Filename <- paste( RunYearDir, "/", "PropAuDvmt", ".RData", sep="" )
+      PropAuDvmt <- assignLoad(Filename)
+      rm(Filename)
+      # Load DVMT
+      Filename <- paste( RunYearDir, "/", "Dvmt.MdDt", ".RData", sep="" )
+      Dvmt.MdDt <- assignLoad( Filename )
+      rm( Filename )
+      
+      #Calculate truck VMT for the metropolitan area
+      #----------------------------------------------
+      #Calculate growth in total percapita income from base year
+      #Calculate change in income
+      IncGrowth <- PerCapInc.Yr[yr] / PerCapInc.Yr[BaseYear]
+      #Calculate truck DVMT
+      TruckDvmt <- IncGrowth * TruckVmtGrowthMultiplier * BaseTruckVmt / 365
+      #Allocate truck VMT to metropolitan areas for later congestion calculation
+      TruckDvmt <- TruckDvmt * MpoBaseDvmtParm..Ma$PropTruckDvmt
+      
+      #Calculate bus DVMT for the metropolitan area
+      #---------------------------------------------
+      #Calculate bus DVMT
+      BusDvmt <- BusRevMi.Yr[yr] * TranAdjFactor / 365
+      
+      #Calculate light vehicle DVMT for the metropolitan area
+      #-------------------------------------------------------
+      #Sum household light vehicle DVMT
+      HhDvmt <- sum( Dvmt.MdDt )
+      #Calculate commercial service vehicle DVMT
+      if (CommVehDvmtMethod == "HouseholdIncome") {
+        CommVehDvmt.MdDt <- calcCommVehTravelFromHhIncome(
+          Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr])$CommVehDvmt.MdDt
+      }
+      if (CommVehDvmtMethod == "HouseholdDvmt") {
+        CommVehDvmt.MdDt <- calcCommVehTravelFromHhDvmt(
+          Dvmt.MdDt, CommVmtFactor)$CommVehDvmt.MdDt
+      }
+      CommVehDvmt <- sum( CommVehDvmt.MdDt )
+      # Calculate total light vehicle DVMT that is on metropolitan area roadways
+      LtVehDvmt <- ( HhDvmt + CommVehDvmt ) * LtVehDvmtFactor.Ma
+      
+      #Calculate total DVMT by type
+      #-----------------------------
+      Dvmt.Ty <- unlist(c( LtVehDvmt, TruckDvmt, BusDvmt ))
+      names( Dvmt.Ty ) <- c( "LtVeh", "Truck", "Bus" ) 
+      
+      #Initialize arrays to store results
+      #-----------------------------------
+      MpgMpkwhAdj.Pt <- numeric( length(Pt) ); names( MpgMpkwhAdj.Pt ) <- Pt
+      VehHr.Ty <- numeric( length(Ty) ); names( VehHr.Ty ) <- Ty
+      AveSpeed.Ty <- numeric( length(Ty) ); names( AveSpeed.Ty ) <- Ty
+      FfVehHr.Ty <- numeric( length(Ty) ); names( FfVehHr.Ty ) <- Ty
+      DelayVehHr.Ty <- numeric( length(Ty) ); names( DelayVehHr.Ty ) <- Ty
+      CongVmt.ClFcTy <- array( 0, dim=c(length(Cl), length(Fc), length(Ty)), 
+                               dimnames=list(Cl,Fc,Ty) )
+      AveCongTaxPerMi <- 0
+      
+      #Adjust the incident delay as a result of reduced crash rate from
+      #autonomous vehicles
+      #----------------------------------------------------------------
+      #Autonomous vehicles reduce crash rates. Assume that autonomous vehicles
+      #remove all crashes due to driver error. Over 90% of crashes are
+      #estimated to be due to driver error. Assume that crash reduction is
+      #proportional to the proportion of autonomous vehicle DVMT. About 50% of 
+      #incident-related congestion is estimated to be due to crashes.
+      calcIncidentDelayAdj <- function(IncidentDelay.2d, AuDvmtProp) {
+        IncidentAdj <- 1 - (0.9 * 0.5 * AuDvmtProp)
+        IncidentDelay.2d * IncidentAdj
+      }
+      CongModel_$OpsDelayReduce_$Incident <-
+        calcIncidentDelayAdj(CongModel_$OpsDelayReduce_$Incident, PropAuDvmt)
+
+      #Calculate effects of congestion on speed and emissions
+      #-------------------------------------------------------
+      #Make an array of congestion prices
+      CongPrice.ClFc <- array( 0, dim=c( length(Cl), length(Fc) ), dimnames=list( Cl, Fc ) )
+      CongPrice.ClFc[ "Sev", "Fwy" ] <- CongPriceParm_Va..$FwySev[ 1, yr ]
+      CongPrice.ClFc[ "Ext", "Fwy" ] <- CongPriceParm_Va..$FwyExt[ 1, yr ]
+      CongPrice.ClFc[ "Sev", "Art" ] <- CongPriceParm_Va..$ArtSev[ 1, yr ]
+      CongPrice.ClFc[ "Ext", "Art" ] <- CongPriceParm_Va..$ArtExt[ 1, yr ]
+
+      #Calculate congestion results
+      CongResults_ <- calcCongestion( 
+        CongModel_ = CongModel_, 
+        Dvmt.Ty = Dvmt.Ty, 
+        PerCapFwy = FwyLnMiCap.Yr[ yr ] * FwyLnMiMult,                           
+        PerCapArt = ArtLnMiCap.Yr[ yr ], 
+        Pop = sum( Pop.DtYr[ , yr ] ),                                 
+        BasePop = sum( Pop.DtYr[ , BaseYear ] ),
+        FwyArtProp = MpoBaseDvmtParm..Ma[ Ma, "FwyArtProp" ], 
+        BusVmtSplit.Fc = TruckBusFcDvmtSplit_Va..$BusVmt[ Ma, ], 
+        TruckVmtSplit.Fc = TruckBusFcDvmtSplit_Va..$TruckVmt[ Ma, ],
+        OpsDeployParm_Va.MaYr = OpsDeployParm_Va.MaYr, 
+        SmoothEcoDriveParm_Va.. = SmoothEcoDriveParm_Va..,
+        OtherOps_Yr.LvTy = OtherOps_Yr.LvTy, 
+        CongPrice.ClFc = CongPrice.ClFc, 
+        CongEfficiency.YrPt = CongEfficiency.YrPt, 
+        ValueOfTime = ValueOfTime,
+        ma=Ma )
+      
+      #Save the results
+      #-----------------
+      Filename <- paste( RunYearDir, "/", "CongResults_", ".RData", sep="" )
+      save( CongResults_, file=Filename )
+      
+      #Return results to the enclosing environment
+      #--------------------------------------------
+      CommVehDvmt.MdDt <<- CommVehDvmt.MdDt
+      CommVehDvmt <<- CommVehDvmt
+      TruckDvmt <<- TruckDvmt
+      BusDvmt <<- BusDvmt
+      MpgMpkwhAdj.Pt <<- CongResults_$MpgMpkwhAdj.Pt
+      AveCongTaxPerMi <<- CongResults_$AveCongTaxPerMi
+      LtVehDvmt <<- LtVehDvmt
+      HhRoadDvmt <<- HhDvmt * LtVehDvmtFactor.Ma
+      Dvmt.Ty <<- Dvmt.Ty
+      
+    } )
+    
+    #Step 5d: Calculate Commercial Service Vehicle Fuel Consumption, Emissions, Costs
+    #================================================================================
+    
+    #Store all the commercial service vehicle calculations in a list
+    CommServ_ <- list()
+    #Calculate CS DVMT by county and development type
+    if (CommVehDvmtMethod == "HouseholdIncome") {
+      CommServ_ <- c( CommServ_, calcCommVehTravelFromHhIncome(
+        Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr]) )
+    }
+    if (CommVehDvmtMethod == "HouseholdDvmt") {
+      CommServ_ <- c( CommServ_, calcCommVehTravelFromHhDvmt(
+        Dvmt.MdDt, CommVmtFactor) )
+    }
+    #Calculate DVMT by vehicle type a vehicle age characteristics
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehTypeAgeProp( 
+      CommVehDvmt.MdDt, yr, CommServiceLtTruckProp.Yr,
+      VehProp_$AgCumProp.AgTy, AgeAdj.YrTy ) ) )
+    #Calculate the powertrain proportions, MPG and MPKWH
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehPowertrainMpgMpkwh( 
+      CommServicePtProp..Yr, CommServAutoAgProp.Ag, 
+      CommServLtTruckAgProp.Ag, AutoLtTrkMpg..Yr,
+      HevMpgProp..Yr, EvRangeProp..Yr, MpgMpkwhAdj.Pt ) ) )
+    #Calculate DVMT powered by hydrocarbons vs. electricity            
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehHcEvDvmt( 
+      CommServAutoDvmt.MdDt, CommServAutoProp.Pt,
+      CommServLtTruckDvmt.MdDt, CommServLtTruckProp.Pt ) ) )
+    #Calculate daily electricity and power consumption
+    CommServ_ <- c( CommServ_, with( CommServ_, calcFuelElectricityUse( 
+      CommServAveAutoMpg, CommServAveLtTruckMpg,
+      CommServAveAutoMpkwh, CommServAveLtTruckMpkwh,
+      CommServAutoHcDvmt.MdDt, CommServAutoEvDvmt.MdDt,
+      CommServLtTruckHcDvmt.MdDt, CommServLtTruckEvDvmt.MdDt ) ) ) 
+    #Calculate average emissions per gallon of fuel consumed
+    CommServ_ <- c( CommServ_, calcAveFuelCarbonIntensity(
+      yr, CommServiceFuels..Yr, FuelCo2..Yr ) )
+    #Calculate emissions                                        
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehEmissions(
+      yr, MjPerGallon, PowerCo2.DiYr,
+      AveAutoFuelCo2, AveLtTruckFuelCo2,
+      CommServAutoFuel.MdDt, CommServLtTruckFuel.MdDt,
+      CommServAutoPower.MdDt, CommServLtTruckPower.MdDt ) ) )
+    #Calculate commercial vehicle costs
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehCosts( 
+      yr, Costs.YrCs, it, 
+      CommVehDvmt.MdDt, CommServAutoDvmt.MdDt, 
+      CommServLtTruckDvmt.MdDt, CommServAutoFuel.MdDt, 
+      CommServLtTruckFuel.MdDt, CommServAutoPower.MdDt, 
+      CommServLtTruckPower.MdDt, CommServAutoHcCo2e.MdDt,
+      CommServLtTruckHcCo2e.MdDt, CommServAutoEvCo2e.MdDt,
+      CommServLtTruckEvCo2e.MdDt ) ) )
+    #Calculate commercial auto and light truck emission rates by vehicle age
+    CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehEmissionRatesByAge( 
+      yr, CommServAutoProp.AgPt, CommServLtTruckProp.AgPt,
+      CommServAutoMpgMpkwh.AgPt, CommServLtTruckMpgMpkwh.AgPt,
+      AveAutoFuelCo2, AveLtTruckFuelCo2, MjPerGallon, PowerCo2.DiYr,
+      CommServAutoHcDvmt.MdDt, CommServAutoEvDvmt.MdDt,
+      CommServLtTruckHcDvmt.MdDt, CommServLtTruckEvDvmt.MdDt ) ) ) 
+    #Save the income factor for calculating commercial vehicle travel
+    Filename <- paste( ModelDir, "/", "CommVehDvmtPerInc", ".RData", sep="" )
+    CommServ_$CommVehDvmtPerInc <- assignLoad( Filename )
+    #Save the results
+    Filename <- paste( RunYearDir, "/", "CommServ_", ".RData", sep="" )
+    save( CommServ_, file=Filename )
+    
+    #Step 5e: Calculate Total Costs and the VMT Surcharge to Pay for Infrastructure
+    #==============================================================================
+    
+    #Calculate total costs
+    #----------------------
+    #Calculate total household road cost, adjusting for DVMT adjustment
+    DvmtAdjRatio <- sum( CostSummary.MdVa[ , "AdjDvmt" ] ) / sum( CostSummary.MdVa[ , "Dvmt" ] )  
+    TotHhRoadCost <- sum( CostSummary.MdVa[ , "TotRoadCost" ] ) * DvmtAdjRatio
+    #Calculate light vehicle DVMT
+    LtVehDvmt <- sum( CostSummary.MdVa[ , "AdjDvmt" ] ) + sum( CommServ_$CommVehDvmt.MdDt )
+    #First iteration, calculate the extra modernization cost for new lanes (ExtraModCost)
+    if( it == 1 ) {
+      HvyVehDvmtEq <- TruckDvmt * CongModel_$Pce.Ty["Truck"] + sum( BusDvmt ) * CongModel_$Pce.Ty["Bus"]
+      LtVehAddCostProp <- LtVehDvmt / ( LtVehDvmt + HvyVehDvmtEq ) 
+      LnMiAddCost <- LtVehAddCostProp * AnnLnMiAddCosts.Yr[yr] / 365
+      ExtraModCost <- LnMiAddCost / LtVehDvmt 
+      TotRoadCost <- TotHhRoadCost + CommServ_$CommServCosts.[ "TotRoadCost" ] + LnMiAddCost
+      rm( HvyVehDvmtEq, LtVehAddCostProp, LnMiAddCost )
+      # Otherwise sum household & commercial vehicle costs because they include the added lane-mile costs 
+    } else {
+      TotRoadCost <- TotHhRoadCost + CommServ_$CommServCosts.[ "TotRoadCost" ]
+    }
+    
+    #Calculate total revenues
+    #-------------------------
+    #Calculate total household revenues, adjusting for DVMT adjustment
+    TotHhRoadUseTax <- sum( CostSummary.MdVa[ , "RoadUseTax" ] ) * DvmtAdjRatio
+    #Add in estimated congestion tax if 1st iteration (since costs calculated before congestion tax)
+    if( it == 1 ) {
+      TotHhRoadUseTax <- TotHhRoadUseTax + sum( HhRoadDvmt * AveCongTaxPerMi )
+    }			
+    #Add in commercial light service vehicle
+    TotRoadUseTax <- TotHhRoadUseTax + CommServ_$CommServCosts.["RoadUseTax"]
+    
+    #Compare total costs to revenues and calculate VMT surcharge to pay for system
+    #------------------------------------------------------------------------------
+    #This procedure calculates how much to increase a VMT tax to pay for system costs
+    #It includes guards to keep the procedure from adding a negative surcharge that counteracts
+    #VMT tax assumptions that are inputs to the model.
+    #Calculate the gap between taxes and costs
+    TaxGap <- TotRoadCost - TotRoadUseTax
+    if( CalcVmtSurcharge ) {
+      # If this is the first iteration, the tax gap per mile is added to the starting surcharge of 0
+      if( it == 1 ) {
+        # Calculate a VmtSurcharge only if there is a positive tax gap
+        if( TaxGap > 0 ) {
+          VmtSurcharge.It[ it ] <- TaxGap / LtVehDvmt
+          # If the tax gap is negative, the VMT surcharge is zero
+        } else {
+          VmtSurcharge.It[ it ] <- 0
+        }
+        # If later iteration, add the calculated tax gap per mile to the previous surcharge
+      } else {
+        # If the VmtSurcharge for the previous iteration is positive, 
+        # calculate the added surcharge for the iteration
+        if( VmtSurcharge.It[ it - 1 ] > 0 ) { 
+          VmtSurcharge.It[ it ] <- VmtSurcharge.It[ it - 1 ] +  TaxGap / LtVehDvmt
+          # Otherwise the VmtSurcharge is zero
+        } else {
+          VmtSurcharge.It[ it ] <- 0
+        }
+      }
+      # End calculation of VMT surcharge (if calculation is to be done)
+    }				
+    
+    #Clean up
+    #---------
+    RoadCostSummary. <- c( TotRoadCost=TotRoadCost, TotRoadUseTax=TotRoadUseTax, TaxGap=TaxGap )
+    Filename <- paste( RunYearDir, "/", "RoadCostSummary.", ".RData", sep="" )
+    save( RoadCostSummary., file=Filename )
+    rm( DvmtAdjRatio, TotHhRoadCost, LtVehDvmt, TotRoadCost, TotHhRoadUseTax, TotRoadUseTax )			
+    gc()
+    print( memory.size() )
+    
+    
+    #Step 5f: Adjust MPG & MPKWH for ecodriving and low rolling resistance tires
+    #===========================================================================
+    
+    # Only do this once, on the first iteration
+    # Otherwise ecodriving would keep increasing MPG with each iteration
+    if( it == 1 ) {
       
       StartTime <- Sys.time()
-      print( paste( "Iteration", it, "Calculate emissions and cost and adjust DVMT" ) )
+      print( paste( "Iteration", it, "Adjust MPG & MPKWH for ecodriving etc." ) )
       
-      #Steps 4a & 4b: calculate energy consumption, CO2e, production, household costs, and adjust DVMT from costs
-      #==========================================================================================================
       for( md in Md ) {
         
         print( md )
         
-        # Identify the districts in the metropolitan division
-        Dx <- Di[ Di %in% rownames( DistrictGroups.. )[ DistrictGroups..$Division == md ] ]
-        
-        # Load division file
-        Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )  
+        # Load household file for metropolitan division
+        Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
         SynPop.. <- assignLoad( Filename )
+        rm( Filename )
         
-        #Step 4a: Calculate fuel & electricity consumption, CO2e production, & household costs
-        #=====================================================================================
-  
-        #Calculate household vehicle fuel & electricity consumption and CO2e production
-        #------------------------------------------------------------------------------
-        #Calculate consumption and production at a household level
-        ModelVar. <- c( "Hhvehcnt", "HcVehDvmt", "VehMpg", "VehType", "EvVehDvmt",
-                        "VehMpkwh", "Dvmt" )
-        for( dx in Dx ) {
-          IsDistrict. <- SynPop..$District == dx 
-          if (sum(IsDistrict. > 0)) {
-            FuelElecCo2e_ <- calcVehFuelElecCo2( SynPop..[ IsDistrict., ModelVar. ], AveFuelCo2e.=AveFuelCo2e.LdYr[,yr],
-                                                 AveElectricCo2e=AveElectricCo2e.DiYr[dx,yr] )
-            SynPop..$FuelGallons[ IsDistrict. ] <- FuelElecCo2e_$FuelGallons
-            SynPop..$FuelCo2e[ IsDistrict. ] <- FuelElecCo2e_$FuelCo2e
-            SynPop..$ElecKwh[ IsDistrict. ] <- FuelElecCo2e_$ElecKwh
-            SynPop..$ElecCo2e[ IsDistrict. ] <- FuelElecCo2e_$ElecCo2e
-            rm( FuelElecCo2e_ )
-          }
-        }
-        rm( ModelVar. )
-        gc()
-        
-        #Calculate car service vehicle fuel & electricity consumption and CO2e production
-        #--------------------------------------------------------------------------------
-        #Calculate average MPG, MPkWh, fuel CO2e, & power CO2e
-        CarSvcFuelElecCo2Rate_ <- 
-          calcCarSvcFuelElecCo2Rates( Year = yr, 
-                                      CarSvcCostParm.. = CarSvcCostParm.., 
-                                      CarSvcLtTruckProp.Yr = CarSvcLtTruckProp.Yr, 
-                                      CarSvcPtProp..Yr = CarSvcPtProp..Yr,
-                                      AutoLtTrkMpg..Yr = AutoLtTrkMpg..Yr, 
-                                      EvRangeProp..Yr = EvRangeProp..Yr, 
-                                      HevMpgProp..Yr = HevMpgProp..Yr,
-                                      FuelCo2..Yr = FuelCo2..Yr, 
-                                      PowerCo2.DiYr = PowerCo2.DiYr)
-        #Calculate amounts of fuel and power consumed, and CO2e produced
-        CarSvcFuelElecCo2_ <- calcCarSvcFuelElecCo2()
-        SynPop..$CarSvcFuelGal <- CarSvcFuelElecCo2_$CarSvcFuelGal
-        SynPop..$CarSvcElecKwh <- CarSvcFuelElecCo2_$CarSvcElecKwh
-        SynPop..$CarSvcFuelCo2e <- CarSvcFuelElecCo2_$CarSvcFuelCo2e
-        SynPop..$CarSvcElecCo2e <- CarSvcFuelElecCo2_$CarSvcElecCo2e
-        #Clean up
-        rm(CarSvcFuelElecCo2Rate_, CarSvcFuelElecCo2_)
-        
-        #Calculate household costs
-        #-------------------------
-        
-        # Identify congestion price for metropolitan area if any
-        CongPrice <- AveCongTaxPerMi
-        # Identify the VmtSurcharge calculated to balance costs and revenues
-        if( it == 1 ) {
-          VmtSurcharge <- 0
-        } else {
-          VmtSurcharge <- VmtSurcharge.It[ it - 1 ]   # VmtSurcharge is value calculated in previous iteration
-        }
-        # Run household travel cost model  
-        ModelVar. <- 
-          c( "Dvmt", "FuelGallons", "FuelCo2e", "ElecCo2e", "ElecKwh", "DevType", 
-             "Payd", "DailyPkgCost", "Hhvehcnt", "DepExp", "Hhincttl",
-             "CarSvcFuelGal", "CarSvcFuelCo2e", "CarSvcElecCo2e", "CarSvcElecKwh",
-             "CarSvcDvmt", "CarSvcBaseCost", "EvVehDvmt", "HcVehDvmt")
-        Costs_ <- calcCosts( Data..=SynPop..[ , ModelVar. ], 
-                             Costs.=Costs.YrCs[ yr, ], 
-                             PaydRate=Payd..Yr[ "RatePerMile", yr ],
-                             CongPrice=CongPrice,
-                             VmtSurcharge=VmtSurcharge, 
-                             ExtraModCost=ExtraModCost,
-                             AVPkgDiscProp=HhVehOwnParm..["AVPkgDiscProp",yr] )
-        rm( VmtSurcharge )	
-        # Add selected cost data to household records
-        SynPop..$FutrCostPerMi <- Costs_$FutrCostPerMi
-        SynPop..$TotExtCost <- Costs_$TotExtCost
-        SynPop..$HhTotCost <- Costs_$HhTotCost
-        SynPop..$VehOwnExp <- Costs_$VehOwnExp
-        
-        # Add sums to DVMT and cost summary
-        Dvmt.MdDt[ md, Dt] <- 
-          tapply( SynPop..$Dvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
-                  SynPop..$DevType, sum, na.rm=TRUE )[Dt]
-        Dvmt.MdDt[ is.na( Dvmt.MdDt ) ] <- 0
-        CostSummary.MdVa[ md, "Dvmt" ] <- sum( Dvmt.MdDt[md,] )
-        CostSummary.MdVa[ md, "FuelCost" ] <- sum( Costs_$FuelCost )  
-        CostSummary.MdVa[ md, "PowerCost" ] <- sum( Costs_$PowerCost ) 
-        CostSummary.MdVa[ md, "RoadUseTax" ] <- sum( Costs_$RoadUseTax )
-        CostSummary.MdVa[ md, "CarbonTax" ] <- sum( Costs_$CarbonTax )
-        CostSummary.MdVa[ md, "AddedExtTax" ] <- sum( Costs_$AddedExtTax )
-        CostSummary.MdVa[ md, "PaydCost" ] <- sum( Costs_$PaydCost )
-        CostSummary.MdVa[ md, "TotExtCost" ] <- sum( Costs_$TotExtCost )
-        CostSummary.MdVa[ md, "HhTotCost" ] <- sum( Costs_$HhTotCost )
-        CostSummary.MdVa[ md, "FutrCostPerMi" ] <- sum(Costs_$HhTotCost) / sum(Dvmt.MdDt[md,])
-        CostSummary.MdVa[ md, "VehOwnExp" ] <- sum( Costs_$VehOwnExp )
-        CostSummary.MdVa[ md, "TotRoadCost" ] <- sum( Costs_$TotRoadCost )
-        rm( Costs_, ModelVar. )
-        gc()
-        
-        
-        #Step 4b: Calculate DVMT with new costs and reallocate to vehicles
-        #=================================================================
-        
-        # Recalculate DVMT
-        #-----------------
-        PrevDvmt.Hh <- SynPop..$Dvmt
-        ModelVar. <- c( "Dvmt", "CarSvcDvmt", "AuDvmt", "NAuDvmt", 
-                        "BaseCostPerMi", "FutrCostPerMi", "LtVehAdjFactor",
-                        "TdmLtVehAdjFactor", "Hhincttl", "CashOutIncAdj")
-        Bgt_ <- 
-          calcAdjAveDvmt( SynPop..[ , ModelVar. ], BudgetProp=BudgetProp, 
-                          AnnVmtInflator=AnnVmtInflator, TrnstnProp=1 )
-        SynPop..$Dvmt <- Bgt_$HhDvmt
-        SynPop..$AuDvmt <- Bgt_$AuDvmt
-        SynPop..$NAuDvmt <- Bgt_$NAuDvmt
-        SynPop..$CarSvcDvmt <- Bgt_$CarSvcDvmt
-        SynPop..$LtVehDvmt <- Bgt_$LtVehDvmt
-        
-        #Calculate 95th percentile and maximum DVMT
-        #------------------------------------------
-        SynPop..$MaxDvmt <- 0
-        SynPop..$Dvmt95 <- 0
-        MetroMax95th_ <- 
-          predictMaxDvmt( SynPop..[ , c( "Dvmt", "MaxDvmt", "Dvmt95" ) ], DvmtLmModels_, "Metro" )
-        SynPop..$MaxDvmt <- MetroMax95th_$DvmtMax
-        SynPop..$Dvmt95 <- MetroMax95th_$Dvmt95th
-        rm( MetroMax95th_ )
-        gc()
-        
-        # Split adjusted DVMT among vehicles
-        #-----------------------------------
-        DvmtAdjFactor.Hh <- SynPop..$Dvmt / PrevDvmt.Hh
+        # Calculate adjustments
         HasVeh.Hh <- SynPop..$Hhvehcnt >= 1
-        ModelVar. <- c( "VehDvmt", "HcVehDvmt", "EvVehDvmt" )
-        AdjDvmt_ <- allocateAdjDvmt( SynPop..[ HasVeh.Hh, ModelVar. ], DvmtAdjFactor.Hh[ HasVeh.Hh ] )
-        SynPop..$VehDvmt[ HasVeh.Hh ] <- AdjDvmt_$VehDvmt
-        SynPop..$EvVehDvmt[ HasVeh.Hh ] <- AdjDvmt_$EvVehDvmt
-        SynPop..$HcVehDvmt[ HasVeh.Hh ] <- AdjDvmt_$HcVehDvmt
-        rm( DvmtAdjFactor.Hh, HasVeh.Hh, ModelVar., AdjDvmt_ )
-        gc()
+        ModelVar. <- c( "Houseid", "Hhvehcnt", "IsEcoDriver", "IsLowRollTire", "Powertrain", 
+                        "VehMpg", "VehMpkwh" )
         
-        # Tabulate DVMT to use in congestion analysis
-        #--------------------------------------------
-        Dvmt.MdDt[md,Dt] <- 
-          tapply( SynPop..$Dvmt + SynPop..$CarSvcDvmt * (1 + SynPop..$CarSvcRepoProp), 
-                  SynPop..$DevType, sum, na.rm=TRUE )[Dt]
-        Dvmt.MdDt[ is.na( Dvmt.MdDt ) ] <- 0
-        CostSummary.MdVa[ md, "AdjDvmt" ] <- sum( SynPop..$Dvmt, na.rm=TRUE )
-  
-        #Tabulate autonomous vehicle VMT
-        #-------------------------------
-        AuDvmt.MdDt[md,Dt] <- 
-          tapply( SynPop..$AuDvmt + SynPop..$CarSvcDvmt * CarSvcIsAV, 
-                  SynPop..$DevType, sum, na.rm=TRUE )[Dt]        
-        AuDvmt.MdDt[ is.na( AuDvmt.MdDt ) ] <- 0  
-  
+        # Calculate adjusted MPG and emissions
+        MpgMpkwhAdj_ <- adjEcoTire( Data..=SynPop..[ HasVeh.Hh, ModelVar. ], 
+                                    MpgMpkwhAdj.Pt=MpgMpkwhAdj.Pt, 
+                                    TireMpgImp=EcoTire..Yr[yr,"TireMpgImp"], 
+                                    TireMpkwhImp=EcoTire..Yr[yr,"TireMpkwhImp"] )
+        rm( ModelVar. )
+        
+        # Assign to households
+        SynPop..$VehMpg[ HasVeh.Hh ] <- MpgMpkwhAdj_$VehMpg_
+        SynPop..$VehMpkwh[ HasVeh.Hh ] <- MpgMpkwhAdj_$VehMpkwh_
+        rm( HasVeh.Hh, MpgMpkwhAdj_ )
+        
         # Save the household dataset
-        #---------------------------
         Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
         save( SynPop.., file=Filename, compress=TRUE )
         rm( SynPop.. )
@@ -859,357 +1351,67 @@ for( yr in RunYears ) {
         gc()
         print( memory.size() )
         
-        # End iteration through metropolitan divisions
       }
       
-      # Save the tabulations of Dvmt and Costs
-      #---------------------------------------
-      Filename <- paste( RunYearDir, "/", "Dvmt.MdDt", ".RData", sep="" )
-      save( Dvmt.MdDt, file=Filename )
-      rm( Filename )
-      Filename <- paste( RunYearDir, "/", "AuDvmt.MdDt", ".RData", sep="" )
-      save( AuDvmt.MdDt, file=Filename )
-      rm( Filename )
-      Filename <- paste( RunYearDir, "/", "CostSummary.MdVa", ".RData", sep="" )
-      save( CostSummary.MdVa, file=Filename )
-      rm( Filename )
       print( StartTime )
       print( Sys.time() )
       
-      
-      #Step 4c: Calculate Effects of Congestion
-      #========================================
-      
-      local( {
-        
-        # Load data summaries
-        #--------------------
-        # Load income
-        Filename <- paste( OutputDir, "/Inc.DtYr.RData", sep="" )
-        Inc.DtYr <- assignLoad( Filename )
-        # Load population
-        Filename <- paste( OutputDir, "/Pop.DtYr.RData", sep="" )
-        Pop.DtYr <- assignLoad( Filename )
-        # Calculate population change from base year
-        PopChangeRatio.Dt <- Pop.DtYr[ , yr ] / Pop.DtYr[ , BaseYear ]
-        PopChangeRatio.Dt[ is.na( PopChangeRatio.Dt ) ] <- 0
-        # Load metropolitan transportation summaries
-        Filename <- paste( OutputDir, "/FwyLnMiCap.Yr.RData", sep="" )        
-        FwyLnMiCap.Yr <- assignLoad( Filename )
-        Filename <- paste( OutputDir, "/ArtLnMiCap.Yr.RData", sep="" )
-        ArtLnMiCap.Yr <- assignLoad( Filename )
-        Filename <- paste( OutputDir, "/TranRevMiCap.Yr.RData", sep="" )
-        TranRevMiCap.Yr <- assignLoad( Filename )
-        Filename <- paste( OutputDir, "/BusRevMi.Yr.RData", sep="" )
-        BusRevMi.Yr <- assignLoad( Filename )
-        Filename <- paste( OutputDir, "/RailRevMi.Yr.RData", sep="" )
-        RailRevMi.Yr <- assignLoad( Filename )
-        rm( Filename )
-        # Load DVMT
-        Filename <- paste( RunYearDir, "/", "Dvmt.MdDt", ".RData", sep="" )
-        Dvmt.MdDt <- assignLoad( Filename )
-        rm( Filename )
-        
-        # Calculate truck VMT for the metropolitan area
-        #----------------------------------------------
-        # Calculate growth in total percapita income from base year
-        # Calculate change in income
-        IncGrowth <- PerCapInc.Yr[yr] / PerCapInc.Yr[BaseYear]
-        # Calculate truck DVMT
-        TruckDvmt <- IncGrowth * TruckVmtGrowthMultiplier * BaseTruckVmt / 365
-        # Allocate truck VMT to metropolitan areas for later congestion calculation
-        TruckDvmt <- TruckDvmt * MpoBaseDvmtParm..Ma$PropTruckDvmt
-        
-        # Calculate bus DVMT for the metropolitan area
-        #---------------------------------------------
-        # Calculate bus DVMT
-        BusDvmt <- BusRevMi.Yr[yr] * TranAdjFactor / 365
-        
-        # Calculate light vehicle DVMT for the metropolitan area
-        #-------------------------------------------------------
-        # Sum household light vehicle DVMT
-        HhDvmt <- sum( Dvmt.MdDt )
-        # Calculate commercial service vehicle DVMT
-        if (CommVehDvmtMethod == "HouseholdIncome") {
-          CommVehDvmt.MdDt <- calcCommVehTravelFromHhIncome(
-            Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr])$CommVehDvmt.MdDt
-        }
-        if (CommVehDvmtMethod == "HouseholdDvmt") {
-          CommVehDvmt.MdDt <- calcCommVehTravelFromHhDvmt(
-            Dvmt.MdDt, CommVmtFactor)$CommVehDvmt.MdDt
-        }
-        CommVehDvmt <- sum( CommVehDvmt.MdDt )
-        # Calculate total light vehicle DVMT that is on metropolitan area roadways
-        LtVehDvmt <- ( HhDvmt + CommVehDvmt ) * LtVehDvmtFactor.Ma
-        
-        # Calculate total DVMT by type
-        #-----------------------------
-        Dvmt.Ty <- unlist(c( LtVehDvmt, TruckDvmt, BusDvmt ))
-        names( Dvmt.Ty ) <- c( "LtVeh", "Truck", "Bus" ) 
-  
-        # Automated vehicle capacity expansion factor
-        #--------------------------------------------
-        FwyLnMiMult <- 
-          calcFwyLnMiMult(sum(AuDvmt.MdDt) / sum(Dvmt.MdDt))
-  
-        # Initialize arrays to store results
-        #-----------------------------------
-        MpgMpkwhAdj.Pt <- numeric( length(Pt) ); names( MpgMpkwhAdj.Pt ) <- Pt
-        VehHr.Ty <- numeric( length(Ty) ); names( VehHr.Ty ) <- Ty
-        AveSpeed.Ty <- numeric( length(Ty) ); names( AveSpeed.Ty ) <- Ty
-        FfVehHr.Ty <- numeric( length(Ty) ); names( FfVehHr.Ty ) <- Ty
-        DelayVehHr.Ty <- numeric( length(Ty) ); names( DelayVehHr.Ty ) <- Ty
-        CongVmt.ClFcTy <- array( 0, dim=c(length(Cl), length(Fc), length(Ty)), 
-                                 dimnames=list(Cl,Fc,Ty) )
-        AveCongTaxPerMi <- 0
-  
-        # Calculate effects of congestion on speed and emissions
-        #-------------------------------------------------------
-        # Make an array of congestion prices
-        CongPrice.ClFc <- array( 0, dim=c( length(Cl), length(Fc) ), dimnames=list( Cl, Fc ) )
-        CongPrice.ClFc[ "Sev", "Fwy" ] <- CongPriceParm_Va..$FwySev[ 1, yr ]
-        CongPrice.ClFc[ "Ext", "Fwy" ] <- CongPriceParm_Va..$FwyExt[ 1, yr ]
-        CongPrice.ClFc[ "Sev", "Art" ] <- CongPriceParm_Va..$ArtSev[ 1, yr ]
-        CongPrice.ClFc[ "Ext", "Art" ] <- CongPriceParm_Va..$ArtExt[ 1, yr ]
-        
-        # Calculate congestion results
-        CongResults_ <- calcCongestion( 
-          CongModel_ = CongModel_, 
-          Dvmt.Ty = Dvmt.Ty, 
-          PerCapFwy = FwyLnMiCap.Yr[ yr ] * FwyLnMiMult,                           
-          PerCapArt = ArtLnMiCap.Yr[ yr ], 
-          Pop = sum( Pop.DtYr[ , yr ] ),                                 
-          BasePop = sum( Pop.DtYr[ , BaseYear ] ),
-          FwyArtProp = MpoBaseDvmtParm..Ma[ Ma, "FwyArtProp" ], 
-          BusVmtSplit.Fc = TruckBusFcDvmtSplit_Va..$BusVmt[ Ma, ], 
-          TruckVmtSplit.Fc = TruckBusFcDvmtSplit_Va..$TruckVmt[ Ma, ],
-          OpsDeployParm_Va.MaYr = OpsDeployParm_Va.MaYr, 
-          SmoothEcoDriveParm_Va.. = SmoothEcoDriveParm_Va..,
-          OtherOps_Yr.LvTy = OtherOps_Yr.LvTy, 
-          CongPrice.ClFc = CongPrice.ClFc, 
-          CongEfficiency.YrPt = CongEfficiency.YrPt, 
-          ValueOfTime = ValueOfTime,
-          ma=Ma )
-        
-        # Save the results
-        #-----------------
-        Filename <- paste( RunYearDir, "/", "CongResults_", ".RData", sep="" )
-        save( CongResults_, file=Filename )
-        
-        # Return results to the enclosing environment
-        #--------------------------------------------
-        CommVehDvmt.MdDt <<- CommVehDvmt.MdDt
-        CommVehDvmt <<- CommVehDvmt
-        TruckDvmt <<- TruckDvmt
-        BusDvmt <<- BusDvmt
-        MpgMpkwhAdj.Pt <<- CongResults_$MpgMpkwhAdj.Pt
-        AveCongTaxPerMi <<- CongResults_$AveCongTaxPerMi
-        LtVehDvmt <<- LtVehDvmt
-        HhRoadDvmt <<- HhDvmt * LtVehDvmtFactor.Ma
-        Dvmt.Ty <<- Dvmt.Ty
-        
-      } )
-      
-      #Step 4d: Calculate Commercial Service Vehicle Fuel Consumption, Emissions, Costs
-      #================================================================================
-      
-      # Store all the commercial service vehicle calculations in a list
-      CommServ_ <- list()
-      # Calculate CS DVMT by county and development type
-      if (CommVehDvmtMethod == "HouseholdIncome") {
-        CommServ_ <- c( CommServ_, calcCommVehTravelFromHhIncome(
-          Dvmt.MdDt, CommVmtFactor, Inc.MdDtYr[,,yr]) )
-      }
-      if (CommVehDvmtMethod == "HouseholdDvmt") {
-        CommServ_ <- c( CommServ_, calcCommVehTravelFromHhDvmt(
-          Dvmt.MdDt, CommVmtFactor) )
-      }
-      # Calculate DVMT by vehicle type a vehicle age characteristics
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehTypeAgeProp( 
-        CommVehDvmt.MdDt, yr, CommServiceLtTruckProp.Yr,
-        VehProp_$AgCumProp.AgTy, AgeAdj.YrTy ) ) )
-      # Calculate the powertrain proportions, MPG and MPKWH
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehPowertrainMpgMpkwh( 
-        CommServicePtProp..Yr, CommServAutoAgProp.Ag, 
-        CommServLtTruckAgProp.Ag, AutoLtTrkMpg..Yr,
-        HevMpgProp..Yr, EvRangeProp..Yr, MpgMpkwhAdj.Pt ) ) )
-      # Calculate DVMT powered by hydrocarbons vs. electricity            
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehHcEvDvmt( 
-        CommServAutoDvmt.MdDt, CommServAutoProp.Pt,
-        CommServLtTruckDvmt.MdDt, CommServLtTruckProp.Pt ) ) )
-      # Calculate daily electricity and power consumption
-      CommServ_ <- c( CommServ_, with( CommServ_, calcFuelElectricityUse( 
-        CommServAveAutoMpg, CommServAveLtTruckMpg,
-        CommServAveAutoMpkwh, CommServAveLtTruckMpkwh,
-        CommServAutoHcDvmt.MdDt, CommServAutoEvDvmt.MdDt,
-        CommServLtTruckHcDvmt.MdDt, CommServLtTruckEvDvmt.MdDt ) ) ) 
-      # Calculate average emissions per gallon of fuel consumed
-      CommServ_ <- c( CommServ_, calcAveFuelCarbonIntensity(
-        yr, CommServiceFuels..Yr, FuelCo2..Yr ) )
-      # Calculate emissions                                        
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehEmissions(
-        yr, MjPerGallon, PowerCo2.DiYr,
-        AveAutoFuelCo2, AveLtTruckFuelCo2,
-        CommServAutoFuel.MdDt, CommServLtTruckFuel.MdDt,
-        CommServAutoPower.MdDt, CommServLtTruckPower.MdDt ) ) )
-      # Calculate commercial vehicle costs
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehCosts( 
-        yr, Costs.YrCs, it, 
-        CommVehDvmt.MdDt, CommServAutoDvmt.MdDt, 
-        CommServLtTruckDvmt.MdDt, CommServAutoFuel.MdDt, 
-        CommServLtTruckFuel.MdDt, CommServAutoPower.MdDt, 
-        CommServLtTruckPower.MdDt, CommServAutoHcCo2e.MdDt,
-        CommServLtTruckHcCo2e.MdDt, CommServAutoEvCo2e.MdDt,
-        CommServLtTruckEvCo2e.MdDt ) ) )
-      # Calculate commercial auto and light truck emission rates by vehicle age
-      CommServ_ <- c( CommServ_, with( CommServ_, calcCommVehEmissionRatesByAge( 
-        yr, CommServAutoProp.AgPt, CommServLtTruckProp.AgPt,
-        CommServAutoMpgMpkwh.AgPt, CommServLtTruckMpgMpkwh.AgPt,
-        AveAutoFuelCo2, AveLtTruckFuelCo2, MjPerGallon, PowerCo2.DiYr,
-        CommServAutoHcDvmt.MdDt, CommServAutoEvDvmt.MdDt,
-        CommServLtTruckHcDvmt.MdDt, CommServLtTruckEvDvmt.MdDt ) ) ) 
-      # Save the income factor for calculating commercial vehicle travel
-      Filename <- paste( ModelDir, "/", "CommVehDvmtPerInc", ".RData", sep="" )
-      CommServ_$CommVehDvmtPerInc <- assignLoad( Filename )
-      # Save the results
-      Filename <- paste( RunYearDir, "/", "CommServ_", ".RData", sep="" )
-      save( CommServ_, file=Filename )
-      
-      #Step 4e: Calculate Total Costs and the VMT Surcharge to Pay for Infrastructure
-      #==============================================================================
-      
-      # Calculate total costs
-      #----------------------
-      # Calculate total household road cost, adjusting for DVMT adjustment
-      DvmtAdjRatio <- sum( CostSummary.MdVa[ , "AdjDvmt" ] ) / sum( CostSummary.MdVa[ , "Dvmt" ] )  
-      TotHhRoadCost <- sum( CostSummary.MdVa[ , "TotRoadCost" ] ) * DvmtAdjRatio
-      # Calculate light vehicle DVMT
-      LtVehDvmt <- sum( CostSummary.MdVa[ , "AdjDvmt" ] ) + sum( CommServ_$CommVehDvmt.MdDt )
-      # First iteration, calculate the extra modernization cost for new lanes (ExtraModCost)
-      if( it == 1 ) {
-        HvyVehDvmtEq <- TruckDvmt * CongModel_$Pce.Ty["Truck"] + sum( BusDvmt ) * CongModel_$Pce.Ty["Bus"]
-        LtVehAddCostProp <- LtVehDvmt / ( LtVehDvmt + HvyVehDvmtEq ) 
-        LnMiAddCost <- LtVehAddCostProp * AnnLnMiAddCosts.Yr[yr] / 365
-        ExtraModCost <- LnMiAddCost / LtVehDvmt 
-        TotRoadCost <- TotHhRoadCost + CommServ_$CommServCosts.[ "TotRoadCost" ] + LnMiAddCost
-        rm( HvyVehDvmtEq, LtVehAddCostProp, LnMiAddCost )
-        # Otherwise sum household & commercial vehicle costs because they include the added lane-mile costs 
-      } else {
-        TotRoadCost <- TotHhRoadCost + CommServ_$CommServCosts.[ "TotRoadCost" ]
-      }
-      
-      # Calculate total revenues
-      #-------------------------
-      # Calculate total household revenues, adjusting for DVMT adjustment
-      TotHhRoadUseTax <- sum( CostSummary.MdVa[ , "RoadUseTax" ] ) * DvmtAdjRatio
-      # Add in estimated congestion tax if 1st iteration (since costs calculated before congestion tax)
-      if( it == 1 ) {
-        TotHhRoadUseTax <- TotHhRoadUseTax + sum( HhRoadDvmt * AveCongTaxPerMi )
-      }			
-      # Add in commercial light service vehicle
-      TotRoadUseTax <- TotHhRoadUseTax + CommServ_$CommServCosts.["RoadUseTax"]
-      
-      # Compare total costs to revenues and calculate VMT surcharge to pay for system
-      #------------------------------------------------------------------------------
-      # This procedure calculates how much to increase a VMT tax to pay for system costs
-      # It includes guards to keep the procedure from adding a negative surcharge that counteracts
-      # VMT tax assumptions that are inputs to the model.
-      # Calculate the gap between taxes and costs
-      TaxGap <- TotRoadCost - TotRoadUseTax
-      if( CalcVmtSurcharge ) {
-        # If this is the first iteration, the tax gap per mile is added to the starting surcharge of 0
-        if( it == 1 ) {
-          # Calculate a VmtSurcharge only if there is a positive tax gap
-          if( TaxGap > 0 ) {
-            VmtSurcharge.It[ it ] <- TaxGap / LtVehDvmt
-            # If the tax gap is negative, the VMT surcharge is zero
-          } else {
-            VmtSurcharge.It[ it ] <- 0
-          }
-          # If later iteration, add the calculated tax gap per mile to the previous surcharge
-        } else {
-          # If the VmtSurcharge for the previous iteration is positive, 
-          # calculate the added surcharge for the iteration
-          if( VmtSurcharge.It[ it - 1 ] > 0 ) { 
-            VmtSurcharge.It[ it ] <- VmtSurcharge.It[ it - 1 ] +  TaxGap / LtVehDvmt
-            # Otherwise the VmtSurcharge is zero
-          } else {
-            VmtSurcharge.It[ it ] <- 0
-          }
-        }
-        # End calculation of VMT surcharge (if calculation is to be done)
-      }				
-      
-      # Clean up
-      #---------
-      RoadCostSummary. <- c( TotRoadCost=TotRoadCost, TotRoadUseTax=TotRoadUseTax, TaxGap=TaxGap )
-      Filename <- paste( RunYearDir, "/", "RoadCostSummary.", ".RData", sep="" )
-      save( RoadCostSummary., file=Filename )
-      rm( DvmtAdjRatio, TotHhRoadCost, LtVehDvmt, TotRoadCost, TotHhRoadUseTax, TotRoadUseTax )			
-      gc()
-      print( memory.size() )
-      
-      
-      #Step 4f: Adjust MPG & MPKWH for ecodriving and low rolling resistance tires
-      #===========================================================================
-      
-      # Only do this once, on the first iteration
-      # Otherwise ecodriving would keep increasing MPG with each iteration
-      if( it == 1 ) {
-        
-        StartTime <- Sys.time()
-        print( paste( "Iteration", it, "Adjust MPG & MPKWH for ecodriving etc." ) )
-        
-        for( md in Md ) {
-          
-          print( md )
-          
-          # Load household file for metropolitan division
-          Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
-          SynPop.. <- assignLoad( Filename )
-          rm( Filename )
-          
-          # Calculate adjustments
-          HasVeh.Hh <- SynPop..$Hhvehcnt >= 1
-          ModelVar. <- c( "Houseid", "Hhvehcnt", "IsEcoDriver", "IsLowRollTire", "Powertrain", 
-                          "VehMpg", "VehMpkwh" )
-          
-          # Calculate adjusted MPG and emissions
-          MpgMpkwhAdj_ <- adjEcoTire( Data..=SynPop..[ HasVeh.Hh, ModelVar. ], 
-                                      MpgMpkwhAdj.Pt=MpgMpkwhAdj.Pt, 
-                                      TireMpgImp=EcoTire..Yr[yr,"TireMpgImp"], 
-                                      TireMpkwhImp=EcoTire..Yr[yr,"TireMpkwhImp"] )
-          rm( ModelVar. )
-          
-          # Assign to households
-          SynPop..$VehMpg[ HasVeh.Hh ] <- MpgMpkwhAdj_$VehMpg_
-          SynPop..$VehMpkwh[ HasVeh.Hh ] <- MpgMpkwhAdj_$VehMpkwh_
-          rm( HasVeh.Hh, MpgMpkwhAdj_ )
-          
-          # Save the household dataset
-          Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
-          save( SynPop.., file=Filename, compress=TRUE )
-          rm( SynPop.. )
-          gc()
-          gc()
-          print( memory.size() )
-          
-        }
-        
-        print( StartTime )
-        print( Sys.time() )
-        
-      }			
-      
-      Filename <- paste( RunYearDir, "/", "VmtSurcharge.It", ".RData", sep="" )
-      save( VmtSurcharge.It, file=Filename )
-      rm( Filename )
-      # End of for loop to equilibrate DVMT, congestion, costs and road use taxes
+    }			
+    
+    Filename <- paste( RunYearDir, "/", "VmtSurcharge.It", ".RData", sep="" )
+    save( VmtSurcharge.It, file=Filename )
+    rm( Filename )
+    # End of for loop to equilibrate DVMT, congestion, costs and road use taxes
     }
   
   
+  #===============================================  
+  #STEP 6: CALCULATE WALK, BIKE, AND TRANSIT TRIPS
+  #===============================================
+  for (md in Md) {
+    
+    #Load division household file
+    Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )  
+    SynPop.. <- assignLoad( Filename )
+    
+    #Define function to calculate quantities adjusted for car service use
+    #Dvmt needs to consider car service DVMT used by household
+    #Vehicle ownership needs to consider availability car services 
+    prepDataForAltModeModel <- function(Data..) {
+      #Sum household vehicle and car service DVMT for household
+      Data..$Dvmt <- Data..$Dvmt + Data..$CarSvcDvmt
+      #Include availability of car service in household vehicle count
+      Data..$Hhvehcnt <- Data..$OrigNumVeh
+      #Return the modified data frame
+      Data..
+    }
+    
+    #Identify data fields to use
+    ModelVar. <- 
+      c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64",
+        "Age65Plus", "Hhsize", "Hhincttl", "Hbppopdn", "Tranmilescap",
+        "Urban", "Dvmt", "Hhvehcnt", "CarSvcDvmt", "OrigNumVeh")
+    
+    #Calculate the alternative mode trips and add to household dataset    
+    AltModeTrips_ <- 
+      calcAltModeTrips(prepDataForAltModeModel(SynPop..[,ModelVar.]), 
+                       AltModeModels_, "Metro")
+    SynPop..$AveWalkTrips <- AltModeTrips_$Walk
+    SynPop..$AveBikeTrips <- AltModeTrips_$Bike
+    SynPop..$AveTransitTrips <- AltModeTrips_$Transit
+    rm(ModelVar., AltModeTrips_)
+    
+    # Save the household dataset
+    Filename <- paste( RunYearDir, "/", md, ".RData", sep="" )
+    save( SynPop.., file=Filename, compress=TRUE )
+    rm( SynPop.. )
+    gc()
+    
+  }
+  
+
   #===========================================================================
-  #STEP 5: CALCULATE METROPOLITAN AREA HEAVY VEHICLE CONSUMPTION AND EMISSIONS
+  #STEP 7: CALCULATE METROPOLITAN AREA HEAVY VEHICLE CONSUMPTION AND EMISSIONS
   #===========================================================================
   
   # Calculate truck and bus age distributions
