@@ -214,7 +214,7 @@ for( yr in RunYears ) {
   #Set random seed for model run
   set.seed( RandomSeedValue )
 
-    
+   
   #================================================================================
   #STEP 2: SIMULATE HOUSEHOLD TRAVEL CHARACTERISTICS FOR EACH METROPOLITAN DIVISION 
   #================================================================================
@@ -417,7 +417,7 @@ for( yr in RunYears ) {
         TdmAdjDvmt.Hh )
     SynPop..$LogSize <- NULL
     SynPop..$LogDvmt <- NULL
-    
+   
     #Step 2f: Apply parking model to identify parkers and calculate daily parking costs
     #==================================================================================
     #This has to be done before the autonomous vehicle model is applied because
