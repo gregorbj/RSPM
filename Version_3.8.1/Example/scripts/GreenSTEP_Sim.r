@@ -884,7 +884,7 @@ for( yr in RunYears ) {
         c( "Dvmt", "FuelGallons", "FuelCo2e", "ElecCo2e", "ElecKwh", "DevType", 
            "Payd", "DailyPkgCost", "Hhvehcnt", "DepExp", "Hhincttl",
            "CarSvcFuelGal", "CarSvcFuelCo2e", "CarSvcElecCo2e", "CarSvcElecKwh",
-           "CarSvcDvmt", "CarSvcBaseCost")
+           "CarSvcDvmt", "CarSvcBaseCost", "EvVehDvmt", "HcVehDvmt")
       Costs_ <- calcCosts( Data..=SynPop..[ , ModelVar. ], 
                            Costs.=Costs.YrCs[ yr, ], 
                            PaydRate=Payd..Yr[ "RatePerMile", yr ],
@@ -987,9 +987,10 @@ for( yr in RunYears ) {
       
       #Tabulate autonomous vehicle VMT
       #-------------------------------
-      AuDvmt.MdDt[md,Dt] <- 
-        tapply( SynPop..$AuDvmt + SynPop..$CarSvcDvmt * CarSvcIsAV, 
-                SynPop..$DevType, sum, na.rm=TRUE )[Dt]        
+      AuDvmt.MdDt[md,Dt] <-
+        tapply(SynPop..$AuDvmt + SynPop..$CarSvcDvmt * SynPop..$CarSvcIsAV * 
+                 (1 + SynPop..$CarSvcRepoProp),
+               SynPop..$DevType, sum, na.rm=TRUE )[Dt]
       AuDvmt.MdDt[ is.na( AuDvmt.MdDt ) ] <- 0  
       
       # Save the household dataset
